@@ -99,7 +99,7 @@ public class StartMongoMojo extends AbstractMojo {
     /**
      * The version of MongoDB to run e.g. 2.1.1, 1.6 v1.8.2, V2_0_4,
      * 
-     * @parameter expression="${mongodb.version}" default-value="3.0.3"
+     * @parameter expression="${mongodb.version}" default-value="3.0.2"
      * @since 1.0.0
      */
     private String version;
@@ -207,6 +207,13 @@ public class StartMongoMojo extends AbstractMojo {
     private String replSet;
 
     /**
+     * Set the size for the MongoDB oplog
+     *
+     * @parameter expression="${mongodb.oplogSize}" default-value="0"
+     */
+    private int oplogSize;
+
+    /**
      * The maven project.
      * 
      * @parameter expression="${project}"
@@ -263,7 +270,7 @@ public class StartMongoMojo extends AbstractMojo {
 
             IMongodConfig config = new MongodConfigBuilder()
                     .version(getVersion()).net(new Net(bindIp, port, Network.localhostIsIPv6()))
-                    .replication(new Storage(getDataDirectory(), replSet, 0))
+                    .replication(new Storage(getDataDirectory(), replSet, oplogSize))
                     .build();
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);

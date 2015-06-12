@@ -56,7 +56,7 @@
                             <port>37017</port>
                             <databaseDirectory>/tmp/mongotest</databaseDirectory>
                             <logging>console</logging>
-                            <version>v3.0.2</version>
+                            <version>v3.0.1</version>
                             <authEnabled>true</authEnabled>
                         </configuration>
                     </execution>
