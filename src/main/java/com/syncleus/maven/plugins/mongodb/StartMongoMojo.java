@@ -1,6 +1,6 @@
 /**
  * Copyright: (c) Syncleus, Inc.
- *
+ * <p/>
  * You may redistribute and modify this source code under the terms and
  * conditions of the Open Source Community License - Type C version 1.0
  * or any later version as published by Syncleus, Inc. at www.syncleus.com.
@@ -9,47 +9,20 @@
  * otherwise use this file except through a legal and valid license. You
  * should also contact Syncleus, Inc. at the information below if you cannot
  * find a license:
- *
+ * <p/>
  * Syncleus, Inc.
  * 2604 South 12th Street
  * Philadelphia, PA 19148
  */
 package com.syncleus.maven.plugins.mongodb;
 
-import static java.util.Collections.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.Authenticator;
-import java.net.InetSocketAddress;
-import java.net.PasswordAuthentication;
-import java.net.Proxy;
-import java.net.ProxySelector;
-import java.net.SocketAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.project.MavenProject;
-
 import com.syncleus.maven.plugins.mongodb.log.Loggers;
 import com.syncleus.maven.plugins.mongodb.log.Loggers.LoggingStyle;
-
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.ArtifactStoreBuilder;
-import de.flapdoodle.embed.mongo.config.DownloadConfigBuilder;
-import de.flapdoodle.embed.mongo.config.IMongodConfig;
-import de.flapdoodle.embed.mongo.config.MongodConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Net;
-import de.flapdoodle.embed.mongo.config.RuntimeConfigBuilder;
-import de.flapdoodle.embed.mongo.config.Storage;
+import de.flapdoodle.embed.mongo.config.*;
 import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.distribution.Versions;
@@ -62,6 +35,18 @@ import de.flapdoodle.embed.process.exceptions.DistributionException;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.runtime.Network;
 import de.flapdoodle.embed.process.store.IArtifactStore;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.project.MavenProject;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.*;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.Collections.singletonList;
 
 /**
  * When invoked, this goal starts an instance of mongo. The required binaries
@@ -70,7 +55,7 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
  * @goal start
  * @phase pre-integration-test
  * @see <a
- *      href="http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de">http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de</a>
+ * href="http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de">http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de</a>
  */
 public class StartMongoMojo extends AbstractMojo {
 
@@ -155,14 +140,14 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * @parameter expression="${mongodb.logFile}"
-     *            default-value="mongodb.log"
+     * default-value="mongodb.log"
      * @since 1.0.0
      */
     private String logFile;
 
     /**
      * @parameter expression="${mongodb.logFileEncoding}"
-     *            default-value="utf-8"
+     * default-value="utf-8"
      * @since 1.0.0
      */
     private String logFileEncoding;
@@ -171,7 +156,7 @@ public class StartMongoMojo extends AbstractMojo {
      * The base URL to be used when downloading MongoDB
      *
      * @parameter expression="${mongodb.downloadPath}"
-     *            default-value="http://fastdl.mongodb.org/"
+     * default-value="http://fastdl.mongodb.org/"
      * @since 1.0.0
      */
     private String downloadPath;
@@ -257,11 +242,11 @@ public class StartMongoMojo extends AbstractMojo {
             }
 
             IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                    .defaults(Command.MongoD)
-                    .processOutput(getOutputConfig())
-                    .artifactStore(getArtifactStore())
-                    .commandLinePostProcessor(commandLinePostProcessor)
-                    .build();
+                .defaults(Command.MongoD)
+                .processOutput(getOutputConfig())
+                .artifactStore(getArtifactStore())
+                .commandLinePostProcessor(commandLinePostProcessor)
+                .build();
 
             if (randomPort) {
                 port = PortUtils.allocateRandomPort();
@@ -269,10 +254,10 @@ public class StartMongoMojo extends AbstractMojo {
             savePortToProjectProperties();
 
             IMongodConfig config = new MongodConfigBuilder()
-                    .version((getVersion() == null || getVersion().equals("") ? Version.Main.PRODUCTION : getVersion()))
-                    .net(new Net(bindIp, port, Network.localhostIsIPv6()))
-                    .replication(new Storage(getDataDirectory(), replSet, oplogSize))
-                    .build();
+                .version((getVersion() == null || getVersion().equals("") ? Version.Main.PRODUCTION : getVersion()))
+                .net(new Net(bindIp, port, Network.localhostIsIPv6()))
+                .replication(new Storage(getDataDirectory(), replSet, oplogSize))
+                .build();
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
         } catch (UnknownHostException e) {
@@ -324,7 +309,7 @@ public class StartMongoMojo extends AbstractMojo {
                 return Loggers.none();
             default:
                 throw new MojoFailureException("Unexpected logging style encountered: \"" + logging + "\" -> " +
-                        loggingStyle);
+                    loggingStyle);
         }
 
     }

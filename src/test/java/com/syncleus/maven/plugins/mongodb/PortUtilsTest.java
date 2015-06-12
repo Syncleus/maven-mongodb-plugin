@@ -1,6 +1,6 @@
 /**
  * Copyright: (c) Syncleus, Inc.
- *
+ * <p/>
  * You may redistribute and modify this source code under the terms and
  * conditions of the Open Source Community License - Type C version 1.0
  * or any later version as published by Syncleus, Inc. at www.syncleus.com.
@@ -9,12 +9,15 @@
  * otherwise use this file except through a legal and valid license. You
  * should also contact Syncleus, Inc. at the information below if you cannot
  * find a license:
- *
+ * <p/>
  * Syncleus, Inc.
  * 2604 South 12th Street
  * Philadelphia, PA 19148
  */
 package com.syncleus.maven.plugins.mongodb;
+
+import org.junit.After;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -23,9 +26,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import org.junit.After;
-import org.junit.Test;
 
 public class PortUtilsTest {
 

@@ -1,6 +1,6 @@
 /**
  * Copyright: (c) Syncleus, Inc.
- *
+ * <p/>
  * You may redistribute and modify this source code under the terms and
  * conditions of the Open Source Community License - Type C version 1.0
  * or any later version as published by Syncleus, Inc. at www.syncleus.com.
@@ -9,7 +9,7 @@
  * otherwise use this file except through a legal and valid license. You
  * should also contact Syncleus, Inc. at the information below if you cannot
  * find a license:
- *
+ * <p/>
  * Syncleus, Inc.
  * 2604 South 12th Street
  * Philadelphia, PA 19148
@@ -23,17 +23,13 @@ import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
 
 public class Loggers {
 
-    public enum LoggingStyle {
-        FILE, CONSOLE, NONE
-    }
-
     public static ProcessOutput file(String logFile, String encoding) {
         FileOutputStreamProcessor file = new FileOutputStreamProcessor(logFile, encoding);
 
         return new ProcessOutput(
-                new NamedOutputStreamProcessor("[mongod output]", file),
-                new NamedOutputStreamProcessor("[mongod error]", file),
-                new NamedOutputStreamProcessor("[mongod commands]", file));
+            new NamedOutputStreamProcessor("[mongod output]", file),
+            new NamedOutputStreamProcessor("[mongod error]", file),
+            new NamedOutputStreamProcessor("[mongod commands]", file));
     }
 
     public static ProcessOutput console() {
@@ -43,5 +39,9 @@ public class Loggers {
     public static ProcessOutput none() {
         NoopStreamProcessor noop = new NoopStreamProcessor();
         return new ProcessOutput(noop, noop, noop);
+    }
+
+    public enum LoggingStyle {
+        FILE, CONSOLE, NONE
     }
 }

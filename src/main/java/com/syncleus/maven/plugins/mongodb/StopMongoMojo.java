@@ -1,6 +1,6 @@
 /**
  * Copyright: (c) Syncleus, Inc.
- *
+ * <p/>
  * You may redistribute and modify this source code under the terms and
  * conditions of the Open Source Community License - Type C version 1.0
  * or any later version as published by Syncleus, Inc. at www.syncleus.com.
@@ -9,23 +9,22 @@
  * otherwise use this file except through a legal and valid license. You
  * should also contact Syncleus, Inc. at the information below if you cannot
  * find a license:
- *
+ * <p/>
  * Syncleus, Inc.
  * 2604 South 12th Street
  * Philadelphia, PA 19148
  */
 package com.syncleus.maven.plugins.mongodb;
 
+import de.flapdoodle.embed.mongo.MongodProcess;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
-import de.flapdoodle.embed.mongo.MongodProcess;
-
 /**
  * When invoked, this goal stops an instance of mojo that was started by this
  * plugin.
- * 
+ *
  * @goal stop
  * @phase post-integration-test
  */
@@ -41,8 +40,8 @@ public class StopMongoMojo extends AbstractMojo {
         if (skip) {
             return;
         }
-        
-        MongodProcess mongod = (MongodProcess)getPluginContext().get(StartMongoMojo
+
+        MongodProcess mongod = (MongodProcess) getPluginContext().get(StartMongoMojo
             .MONGOD_CONTEXT_PROPERTY_NAME);
 
         if (mongod != null) {
