@@ -32,9 +32,12 @@ Usage
 
                 <databaseDirectory>/tmp/mongotest</databaseDirectory>
                 <!-- optional, default is a new dir in java.io.tmpdir -->
+                
+                <artifactDirectory>/tmp/mongoartifact</artifactDirectory>
+                <!-- optional, set directory where MongoDB artifacts are stores, default is ~/.embedmongo -->
 
                 <logging>file</logging>
-                <!-- optional (file|console|none), default console -->
+                <!-- optional (file|console|none), default is console -->
 
                 <logFile>${project.build.directory}/myfile.log</logFile>
                 <!-- optional, can be used when logging=file, default is ./mongod.log -->
@@ -46,7 +49,7 @@ Usage
                 <!-- optional, default is none -->
 
                 <proxyPort>8080</proxyPort>
-                <!-- optional, default 80 -->
+                <!-- optional, default is 80 -->
 
                 <proxyUser>joebloggs</proxyUser>
                 <!-- optional, default is none -->
@@ -59,6 +62,15 @@ Usage
 
                 <downloadPath>http://internal-mongo-repo/</downloadPath>
                 <!-- optional, default is http://fastdl.mongodb.org/ -->
+                
+                <replSet>rs0</replSet>
+                <!-- optional, configures replication set, default is none -->
+                
+                <oplogSize>1073741824</oplogSize>
+                <!-- optional, configures oplog size, default is automatically determined -->
+                
+                <executableNaming>user</executableNaming>
+                <!-- optional (user|uuid), sets the executable naming style, default is uuid -->
 
                 <skip>false</skip>
                 <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->
