@@ -65,7 +65,7 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 
 /**
  * When invoked, this goal starts an instance of mongo. The required binaries
- * are downloaded if no mongo release is found in <code>~/.mongodb</code>.
+ * are downloaded if no mongo release is found in <code>~/.embedmongo</code>.
  * 
  * @goal start
  * @phase pre-integration-test
@@ -155,7 +155,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * @parameter expression="${mongodb.logFile}"
-     *            default-value="embedmongo.log"
+     *            default-value="mongodb.log"
      * @since 1.0.0
      */
     private String logFile;
@@ -200,6 +200,13 @@ public class StartMongoMojo extends AbstractMojo {
     private boolean authEnabled;
 
     /**
+     * Sets a value for the --replSet
+     *
+     * @parameter expression="${mongodb.replSet}"
+     */
+    private String replSet;
+
+    /**
      * The maven project.
      * 
      * @parameter expression="${project}"
@@ -217,7 +224,7 @@ public class StartMongoMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
 
         if (skip) {
-            getLog().debug("skip=true, not starting embedmongo");
+            getLog().debug("skip=true, not starting mongodb");
             return;
         }
         
@@ -256,7 +263,7 @@ public class StartMongoMojo extends AbstractMojo {
 
             IMongodConfig config = new MongodConfigBuilder()
                     .version(getVersion()).net(new Net(bindIp, port, Network.localhostIsIPv6()))
-                    .replication(new Storage(getDataDirectory(), null, 0))
+                    .replication(new Storage(getDataDirectory(), replSet, 0))
                     .build();
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
@@ -289,11 +296,11 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * Saves port to the {@link MavenProject#getProperties()} (with the property
-     * name {@code embedmongo.port}) to allow others (plugins, tests, etc) to
+     * name {@code mongodb.port}) to allow others (plugins, tests, etc) to
      * find the randomly allocated port.
      */
     private void savePortToProjectProperties() {
-        project.getProperties().put("embedmongo.port", String.valueOf(port));
+        project.getProperties().put("mongodb.port", String.valueOf(port));
     }
 
     private ProcessOutput getOutputConfig() throws MojoFailureException {
