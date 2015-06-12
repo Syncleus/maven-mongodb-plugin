@@ -23,8 +23,8 @@ import de.flapdoodle.embed.process.io.NamedOutputStreamProcessor;
 
 public class Loggers {
 
-    public static ProcessOutput file(String logFile, String encoding) {
-        FileOutputStreamProcessor file = new FileOutputStreamProcessor(logFile, encoding);
+    public static ProcessOutput file(final String logFile, final String encoding) {
+        final FileOutputStreamProcessor file = new FileOutputStreamProcessor(logFile, encoding);
 
         return new ProcessOutput(
             new NamedOutputStreamProcessor("[mongod output]", file),
@@ -37,7 +37,7 @@ public class Loggers {
     }
 
     public static ProcessOutput none() {
-        NoopStreamProcessor noop = new NoopStreamProcessor();
+        final NoopStreamProcessor noop = new NoopStreamProcessor();
         return new ProcessOutput(noop, noop, noop);
     }
 

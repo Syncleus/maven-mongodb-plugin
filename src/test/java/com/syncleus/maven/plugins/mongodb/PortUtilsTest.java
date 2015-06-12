@@ -55,7 +55,7 @@ public class PortUtilsTest {
                     port = PortUtils.allocateRandomPort();
                     new ServerSocket(port);
                     // port has been bound successfully
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     throw new RuntimeException("Port " + port + " cannot be bind!");
                 } finally {
                     allocationsCounter.countDown();

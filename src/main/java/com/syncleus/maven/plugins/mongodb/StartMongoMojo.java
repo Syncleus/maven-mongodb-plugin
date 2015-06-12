@@ -224,7 +224,7 @@ public class StartMongoMojo extends AbstractMojo {
             this.addProxySelector();
         }
 
-        MongodExecutable executable;
+        final MongodExecutable executable;
         try {
 
             final ICommandLinePostProcessor commandLinePostProcessor;
@@ -241,7 +241,7 @@ public class StartMongoMojo extends AbstractMojo {
                 commandLinePostProcessor = new ICommandLinePostProcessor.Noop();
             }
 
-            IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
+            final IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
                 .defaults(Command.MongoD)
                 .processOutput(getOutputConfig())
                 .artifactStore(getArtifactStore())
@@ -253,36 +253,36 @@ public class StartMongoMojo extends AbstractMojo {
             }
             savePortToProjectProperties();
 
-            IMongodConfig config = new MongodConfigBuilder()
+            final IMongodConfig config = new MongodConfigBuilder()
                 .version((getVersion() == null || getVersion().equals("") ? Version.Main.PRODUCTION : getVersion()))
                 .net(new Net(bindIp, port, Network.localhostIsIPv6()))
                 .replication(new Storage(getDataDirectory(), replSet, oplogSize))
                 .build();
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             throw new MojoExecutionException("Unable to determine if localhost is ipv6", e);
-        } catch (DistributionException e) {
+        } catch (final DistributionException e) {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Unable to Config MongoDB: ", e);
         }
 
         try {
-            MongodProcess mongod = executable.start();
+            final MongodProcess mongod = executable.start();
 
             if (wait) {
                 while (true) {
                     try {
                         TimeUnit.MINUTES.sleep(5);
-                    } catch (InterruptedException e) {
+                    } catch (final InterruptedException e) {
                         break;
                     }
                 }
             }
 
             getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Unable to start the mongod", e);
         }
     }
@@ -298,7 +298,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     private ProcessOutput getOutputConfig() throws MojoFailureException {
 
-        LoggingStyle loggingStyle = LoggingStyle.valueOf(logging.toUpperCase());
+        final LoggingStyle loggingStyle = LoggingStyle.valueOf(logging.toUpperCase());
 
         switch (loggingStyle) {
             case CONSOLE:
@@ -315,7 +315,7 @@ public class StartMongoMojo extends AbstractMojo {
     }
 
     private IArtifactStore getArtifactStore() {
-        IDownloadConfig downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath).build();
+        final IDownloadConfig downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath).build();
         return new ArtifactStoreBuilder().defaults(Command.MongoD).download(downloadConfig).build();
     }
 
@@ -334,7 +334,7 @@ public class StartMongoMojo extends AbstractMojo {
         final ProxySelector defaultProxySelector = ProxySelector.getDefault();
         ProxySelector.setDefault(new ProxySelector() {
             @Override
-            public List<Proxy> select(URI uri) {
+            public List<Proxy> select(final URI uri) {
                 if (uri.getHost().equals("fastdl.mongodb.org")) {
                     return singletonList(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort)));
                 } else {
@@ -343,7 +343,7 @@ public class StartMongoMojo extends AbstractMojo {
             }
 
             @Override
-            public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+            public void connectFailed(final URI uri, final SocketAddress sa, final IOException ioe) {
             }
         });
     }
@@ -357,7 +357,7 @@ public class StartMongoMojo extends AbstractMojo {
 
         try {
             return Version.valueOf(versionEnumName);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
             return Versions.withFeatures(new IVersion() {
                 @Override

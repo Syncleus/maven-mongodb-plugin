@@ -26,11 +26,11 @@ public final class PortUtils {
 
     public static int allocateRandomPort() {
         try {
-            ServerSocket server = new ServerSocket(0);
-            int port = server.getLocalPort();
+            final ServerSocket server = new ServerSocket(0);
+            final int port = server.getLocalPort();
             server.close();
             return port;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException("Failed to acquire a random free port", e);
         }
     }

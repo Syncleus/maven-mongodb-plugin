@@ -41,7 +41,7 @@ public class StopMongoMojo extends AbstractMojo {
             return;
         }
 
-        MongodProcess mongod = (MongodProcess) getPluginContext().get(StartMongoMojo
+        final MongodProcess mongod = (MongodProcess) getPluginContext().get(StartMongoMojo
             .MONGOD_CONTEXT_PROPERTY_NAME);
 
         if (mongod != null) {

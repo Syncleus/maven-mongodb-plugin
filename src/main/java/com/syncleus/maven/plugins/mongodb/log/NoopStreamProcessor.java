@@ -21,7 +21,7 @@ import de.flapdoodle.embed.process.io.IStreamProcessor;
 public class NoopStreamProcessor implements IStreamProcessor {
 
     @Override
-    public void process(String block) {
+    public void process(final String block) {
     }
 
     @Override

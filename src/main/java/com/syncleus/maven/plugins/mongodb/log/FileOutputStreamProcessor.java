@@ -29,13 +29,13 @@ public class FileOutputStreamProcessor implements IStreamProcessor {
     private String logFile;
     private String encoding;
 
-    public FileOutputStreamProcessor(String logFile, String encoding) {
+    public FileOutputStreamProcessor(final String logFile, final String encoding) {
         setLogFile(logFile);
         setEncoding(encoding);
     }
 
     @Override
-    public synchronized void process(String block) {
+    public synchronized void process(final String block) {
         try {
 
             if (stream == null) {
@@ -45,7 +45,7 @@ public class FileOutputStreamProcessor implements IStreamProcessor {
             stream.write(block);
             stream.flush();
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -55,14 +55,14 @@ public class FileOutputStreamProcessor implements IStreamProcessor {
         process("\n");
     }
 
-    private void setLogFile(String logFile) {
+    private void setLogFile(final String logFile) {
         if (logFile == null || logFile.trim().length() == 0) {
             throw new IllegalArgumentException("no logFile given");
         }
         this.logFile = logFile;
     }
 
-    private void setEncoding(String encoding) {
+    private void setEncoding(final String encoding) {
         if (encoding == null || encoding.trim().length() == 0) {
             throw new IllegalArgumentException("no encoding given");
         }
