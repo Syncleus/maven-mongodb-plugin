@@ -66,7 +66,7 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 /**
  * When invoked, this goal starts an instance of mongo. The required binaries
  * are downloaded if no mongo release is found in <code>~/.embedmongo</code>.
- * 
+ *
  * @goal start
  * @phase pre-integration-test
  * @see <a
@@ -79,7 +79,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The port MongoDB should run on.
-     * 
+     *
      * @parameter expression="${mongodb.port}" default-value="27017"
      * @since 1.0.0
      */
@@ -90,7 +90,7 @@ public class StartMongoMojo extends AbstractMojo {
      * specified by {@code port}. If {@code randomPort} is {@code true}, the
      * random port chosen will be available in the Maven project property
      * {@code embedmongo.port}.
-     * 
+     *
      * @parameter expression="${mongodb.randomPort}" default-value="false"
      * @since 1.0.0
      */
@@ -98,15 +98,15 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The version of MongoDB to run e.g. 2.1.1, 1.6 v1.8.2, V2_0_4,
-     * 
-     * @parameter expression="${mongodb.version}" default-value="3.0.2"
+     *
+     * @parameter expression="${mongodb.version}"
      * @since 1.0.0
      */
     private String version;
 
     /**
      * The location of a directory that will hold the MongoDB data files.
-     * 
+     *
      * @parameter expression="${mongodb.databaseDirectory}"
      * @since 1.0.0
      */
@@ -115,7 +115,7 @@ public class StartMongoMojo extends AbstractMojo {
     /**
      * An IP address for the MongoDB instance to be bound to during its
      * execution.
-     * 
+     *
      * @parameter expression="${mongodb.bindIp}"
      * @since 1.0.0
      */
@@ -123,7 +123,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * A proxy hostname to be used when downloading MongoDB distributions.
-     * 
+     *
      * @parameter expression="${mongodb.proxyHost}"
      * @since 1.0.0
      */
@@ -131,7 +131,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * A proxy port to be used when downloading MongoDB distributions.
-     * 
+     *
      * @parameter expression="${mongodb.proxyPort}" default-value="80"
      * @since 1.0.0
      */
@@ -141,7 +141,7 @@ public class StartMongoMojo extends AbstractMojo {
      * Block immediately and wait until MongoDB is explicitly stopped (eg:
      * {@literal <ctrl-c>}). This option makes this goal similar in spirit to
      * something like jetty:run, useful for interactive debugging.
-     * 
+     *
      * @parameter expression="${mongodb.wait}" default-value="false"
      * @since 1.0.0
      */
@@ -169,7 +169,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The base URL to be used when downloading MongoDB
-     * 
+     *
      * @parameter expression="${mongodb.downloadPath}"
      *            default-value="http://fastdl.mongodb.org/"
      * @since 1.0.0
@@ -178,7 +178,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The proxy user to be used when downloading MongoDB
-     * 
+     *
      * @parameter expression="${mongodb.proxyUser}"
      * @since 1.0.0
      */
@@ -186,7 +186,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The proxy password to be used when downloading MondoDB
-     * 
+     *
      * @parameter expression="${mongodb.proxyPassword}"
      * @since 1.0.0
      */
@@ -194,7 +194,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * Should authorization be enabled for MongoDB
-     * 
+     *
      * @parameter expression="${mongodb.authEnabled}" default-value="false"
      */
     private boolean authEnabled;
@@ -215,7 +215,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     /**
      * The maven project.
-     * 
+     *
      * @parameter expression="${project}"
      * @readonly
      */
@@ -234,7 +234,7 @@ public class StartMongoMojo extends AbstractMojo {
             getLog().debug("skip=true, not starting mongodb");
             return;
         }
-        
+
         if (this.proxyHost != null && this.proxyHost.length() > 0) {
             this.addProxySelector();
         }
@@ -269,7 +269,8 @@ public class StartMongoMojo extends AbstractMojo {
             savePortToProjectProperties();
 
             IMongodConfig config = new MongodConfigBuilder()
-                    .version(getVersion()).net(new Net(bindIp, port, Network.localhostIsIPv6()))
+                    .version((getVersion() == null || getVersion().equals("") ? Version.Main.PRODUCTION : getVersion()))
+                    .net(new Net(bindIp, port, Network.localhostIsIPv6()))
                     .replication(new Storage(getDataDirectory(), replSet, oplogSize))
                     .build();
 

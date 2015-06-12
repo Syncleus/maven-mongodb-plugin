@@ -28,7 +28,7 @@ Usage
                 <!-- optional, default is false, if true allocates a random port and overrides embedmongo.port -->
 
                 <version>2.0.4</version>
-                <!-- optional, default 3.0.3 -->
+                <!-- optional, defaults to latest production release -->
 
                 <databaseDirectory>/tmp/mongotest</databaseDirectory>
                 <!-- optional, default is a new dir in java.io.tmpdir -->
