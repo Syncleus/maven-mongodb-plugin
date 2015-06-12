@@ -26,7 +26,8 @@ Usage
                 <!-- optional, default 27017 -->
 
                 <randomPort>true</randomPort>
-                <!-- optional, default is false, if true allocates a random port and overrides embedmongo.port -->
+                <!-- optional, default is false, if true allocates a random port and
+                     overrides embedmongo.port -->
 
                 <version>2.0.4</version>
                 <!-- optional, defaults to latest production release -->
@@ -35,13 +36,15 @@ Usage
                 <!-- optional, default is a new dir in java.io.tmpdir -->
                 
                 <artifactDirectory>/tmp/mongoartifact</artifactDirectory>
-                <!-- optional, set directory where MongoDB artifacts are stores, default is ~/.embedmongo -->
+                <!-- optional, set directory where MongoDB artifacts are stores,
+                     default is ~/.embedmongo -->
 
                 <logging>file</logging>
                 <!-- optional (file|console|none), default is console -->
 
                 <logFile>${project.build.directory}/myfile.log</logFile>
-                <!-- optional, can be used when logging=file, default is ./mongod.log -->
+                <!-- optional, can be used when logging=file, default is
+                     ./mongod.log -->
 
                 <logFileEncoding>utf-8</logFileEncoding>
                 <!-- optional, can be used when logging=file, default is utf-8 -->
@@ -68,26 +71,31 @@ Usage
                 <!-- optional, configures replication set, default is none -->
                 
                 <oplogSize>1073741824</oplogSize>
-                <!-- optional, configures oplog size, default is automatically determined -->
+                <!-- optional, configures oplog size, default is automatically
+                     determined -->
                 
                 <executableNaming>user</executableNaming>
-                <!-- optional (user|uuid), sets the executable naming style, default is uuid -->
+                <!-- optional (user|uuid), sets the executable naming style, default
+                     is uuid -->
                 
                 <syncDelay>0</syncDelay>
-                <!-- optional, Sets the sync delay, 0 prevents all writing to disk, default lets MongoDB automatically determine value -->
+                <!-- optional, Sets the sync delay, 0 prevents all writing to disk,
+                     default lets MongoDB automatically determine value -->
                 
                 <wait>true</wait>
-                <!-- optional, blocks indefinitely after the MongoDB instance starts, must be stopped with ctrl-c, 
-                 default is false-->
+                <!-- optional, blocks indefinitely after the MongoDB instance starts,
+                     must be stopped with ctrl-c, default is false-->
 
                 <skip>false</skip>
-                <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->
+                <!-- optional, skips this plugin entirely, use on the command line
+                     like -Dembedmongo.skip -->
                 
                 <features>
                     <feature>sync_delay</feature>
                     <feature>text_search</feature>
                 </features>
-                <!-- optional, a list of MongoDB features to enable, default is none -->
+                <!-- optional, a list of MongoDB features to enable, default is
+                     none -->
             </configuration>
         </execution>
         <execution>
