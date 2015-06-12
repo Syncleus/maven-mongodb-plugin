@@ -54,11 +54,10 @@
                             <goal>start</goal>
                         </goals>
                         <configuration>
-                            <port>37017</port>
                             <randomPort>true</randomPort>
                             <databaseDirectory>/tmp/mongotest</databaseDirectory>
                             <logging>console</logging>
-                            <version>v2.2.0</version>
+                            <version>v3.0.1</version>
                         </configuration>
                     </execution>
                     <execution>
