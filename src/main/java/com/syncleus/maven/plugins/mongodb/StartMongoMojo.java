@@ -28,7 +28,6 @@ import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.distribution.Versions;
 import de.flapdoodle.embed.process.config.IRuntimeConfig;
 import de.flapdoodle.embed.process.config.io.ProcessOutput;
-import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.exceptions.DistributionException;
@@ -43,6 +42,9 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
 import java.io.File;
@@ -57,11 +59,10 @@ import static java.util.Collections.singletonList;
  * When invoked, this goal starts an instance of mongo. The required binaries
  * are downloaded if no mongo release is found in <code>~/.embedmongo</code>.
  *
- * @goal start
- * @phase pre-integration-test
  * @see <a
  * href="http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de">http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de</a>
  */
+@Mojo(name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
 public class StartMongoMojo extends AbstractMojo {
 
     private static final String PACKAGE_NAME = StartMongoMojo.class.getPackage().getName();
@@ -70,9 +71,9 @@ public class StartMongoMojo extends AbstractMojo {
     /**
      * The port MongoDB should run on.
      *
-     * @parameter expression="${mongodb.port}" default-value="27017"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.port", defaultValue = "27017")
     private int port;
 
     /**
@@ -81,50 +82,50 @@ public class StartMongoMojo extends AbstractMojo {
      * random port chosen will be available in the Maven project property
      * {@code embedmongo.port}.
      *
-     * @parameter expression="${mongodb.randomPort}" default-value="false"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.randomPort", defaultValue = "false")
     private boolean randomPort;
 
     /**
      * The version of MongoDB to run e.g. 2.1.1, 1.6 v1.8.2, V2_0_4,
      *
-     * @parameter expression="${mongodb.version}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.version")
     private String version;
 
     /**
      * The location of a directory that will hold the MongoDB data files.
      *
-     * @parameter expression="${mongodb.databaseDirectory}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.databaseDirectory")
     private File databaseDirectory;
 
     /**
      * An IP address for the MongoDB instance to be bound to during its
      * execution.
      *
-     * @parameter expression="${mongodb.bindIp}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.bindIp")
     private String bindIp;
 
     /**
      * A proxy hostname to be used when downloading MongoDB distributions.
      *
-     * @parameter expression="${mongodb.proxyHost}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.proxyHost")
     private String proxyHost;
 
     /**
      * A proxy port to be used when downloading MongoDB distributions.
      *
-     * @parameter expression="${mongodb.proxyPort}" default-value="80"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.proxyPort")
     private int proxyPort;
 
     /**
@@ -132,106 +133,110 @@ public class StartMongoMojo extends AbstractMojo {
      * {@literal <ctrl-c>}). This option makes this goal similar in spirit to
      * something like jetty:run, useful for interactive debugging.
      *
-     * @parameter expression="${mongodb.wait}" default-value="false"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.wait", defaultValue = "false")
     private boolean wait;
 
     /**
      * Specifies where log output goes to. Must be one of the following: file, console, none.
      *
-     * @parameter expression="${mongodb.logging}" default-value="console"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.logging", defaultValue = "console")
     private String logging;
 
     /**
-     * @parameter expression="${mongodb.logFile}"
-     * default-value="mongodb.log"
+     * The file to log the output to.
+     *
      * @since 1.0.0
      */
+    @Parameter(property = "logFile", defaultValue = "mongodb.log")
     private String logFile;
 
     /**
-     * @parameter expression="${mongodb.logFileEncoding}"
-     * default-value="utf-8"
+     * Log file encoding type to use.
+     *
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.logFileEncoding", defaultValue = "utf-8")
     private String logFileEncoding;
 
     /**
      * The base URL to be used when downloading MongoDB
      *
-     * @parameter expression="${mongodb.downloadPath}"
-     * default-value="http://fastdl.mongodb.org/"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.downloadPath", defaultValue = "http://fastdl.mongodb.org/")
     private String downloadPath;
 
     /**
      * The proxy user to be used when downloading MongoDB
      *
-     * @parameter expression="${mongodb.proxyUser}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.proxyUser")
     private String proxyUser;
 
     /**
      * The proxy password to be used when downloading MondoDB
      *
-     * @parameter expression="${mongodb.proxyPassword}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.proxyPassword")
     private String proxyPassword;
 
     /**
      * Should authorization be enabled for MongoDB
      *
-     * @parameter expression="${mongodb.authEnabled}" default-value="false"
      */
+    @Parameter(property = "mongodb.authEnabled", defaultValue = "false")
     private boolean authEnabled;
 
     /**
      * Sets a value for the --replSet
      *
-     * @parameter expression="${mongodb.replSet}"
      */
+    @Parameter(property = "mongodb.replSet")
     private String replSet;
 
     /**
      * Set the size for the MongoDB oplog
      *
-     * @parameter expression="${mongodb.oplogSize}" default-value="0"
      */
+    @Parameter(property = "mongodb.oplogSize", defaultValue = "0")
     private int oplogSize;
 
     /**
      * Specifies the executable naming policy used. Must be one of the following values: uuid, user.
      *
-     * @parameter expression="${mongodb.executableNaming}" default-value="uuid"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.exeutableNaming", defaultValue = "uuid")
     private String executableNaming;
 
     /**
      * Specifies the directory to which MongoDB executables are stores.
      *
-     * @parameter expression="${mongodb.artifactDirectory}"
      * @since 1.0.0
      */
+    @Parameter(property = "mongodb.artifactDirectory")
     private String artifactDirectory;
 
     /**
      * The maven project.
      *
-     * @parameter expression="${project}"
-     * @readonly
+     * @since 1.0.0
      */
+    @Parameter(property = "project", readonly = true)
     private MavenProject project;
 
     /**
-     * @parameter expression="${mongodb.skip}" default-value="false"
+     * If true the plugin does nothing at all, allows you to skip from the command line.
+     *
+     * @since 1.0.0
      */
+    @Parameter(property = "mongodb.skip", defaultValue = "false")
     private boolean skip;
 
     @Override
@@ -277,7 +282,7 @@ public class StartMongoMojo extends AbstractMojo {
             savePortToProjectProperties();
 
             final IMongodConfig config = new MongodConfigBuilder()
-                .version((getVersion() == null || getVersion().equals("") ? Version.Main.PRODUCTION : getVersion()))
+                .version(getVersion())
                 .net(new Net(bindIp, port, Network.localhostIsIPv6()))
                 .replication(new Storage(getDataDirectory(), replSet, oplogSize))
                 .build();
@@ -341,7 +346,7 @@ public class StartMongoMojo extends AbstractMojo {
         final ITempNaming naming;
         if(executableNaming == null)
             throw new IllegalStateException("executableNaming should never be null!");
-        if(executableNaming.equals("uuid"))
+        else if(executableNaming.equals("uuid"))
             naming = new UUIDTempNaming();
         else if(executableNaming.equals("user"))
             naming = new UserTempNaming();
@@ -386,6 +391,9 @@ public class StartMongoMojo extends AbstractMojo {
     }
 
     private IFeatureAwareVersion getVersion() {
+        if(this.version == null || this.version.equals(""))
+            return Version.Main.PRODUCTION;
+
         String versionEnumName = this.version.toUpperCase().replaceAll("\\.", "_");
 
         if (versionEnumName.charAt(0) != 'V') {
