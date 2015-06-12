@@ -1,34 +1,51 @@
+<!--
+ *******************************************************************************
+ *  Copyright: (c) Syncleus, Inc.                                              *
+ *                                                                             *
+ *  You may redistribute and modify this source code under the terms and       *
+ *  conditions of the Open Source Community License - Type C version 1.0       *
+ *  or any later version as published by Syncleus, Inc. at www.syncleus.com.   *
+ *  There should be a copy of the license included with this file. If a copy   *
+ *  of the license is not included you are granted no right to distribute or   *
+ *  otherwise use this file except through a legal and valid license. You      *
+ *  should also contact Syncleus, Inc. at the information below if you cannot  *
+ *  find a license:                                                            *
+ *                                                                             *
+ *  Syncleus, Inc.                                                             *
+ *  2604 South 12th Street                                                     *
+ *  Philadelphia, PA 19148                                                     *
+ *******************************************************************************
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.joelittlejohn.embedmongo</groupId>
-        <artifactId>embedmongo-maven-plugin-test-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <groupId>com.syncleus.maven.plugins</groupId>
+        <artifactId>maven-mongodb-plugin-test-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.github.joelittlejohn.embedmongo</groupId>
-    <artifactId>embedmongo-maven-plugin-test1</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <groupId>com.syncleus.maven.plugins</groupId>
+    <artifactId>maven-mongodb-plugin-test1</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
 
-    <url>https://github.com/joelittlejohn/embedmongo-maven-plugin</url>
+    <url>http://wiki.syncleus.com/index.php/maven-mongodb-plugin</url>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.4</version>
                 <configuration>
                     <source>1.6</source>
                     <target>1.6</target>
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>com.github.joelittlejohn.embedmongo</groupId>
-                <artifactId>embedmongo-maven-plugin</artifactId>
+                <groupId>com.syncleus.maven.plugins</groupId>
+                <artifactId>maven-mongodb-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>start</id>

@@ -1,4 +1,5 @@
 # Contributors
+* Jeffrey Phillips Freeman <jeffrey.freeman@syncleus.com>
 * Joe Littlejohn <joelittlejohn@gmail.com>
 * Paulo Pires <pjpires@gmail.com>
 * Jeremy Norris <jeremy.norris@service-now.com>

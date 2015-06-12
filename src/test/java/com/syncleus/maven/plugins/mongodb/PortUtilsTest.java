@@ -1,19 +1,20 @@
 /**
- * Copyright © 2012 Joe Littlejohn
+ * Copyright: (c) Syncleus, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may redistribute and modify this source code under the terms and
+ * conditions of the Open Source Community License - Type C version 1.0
+ * or any later version as published by Syncleus, Inc. at www.syncleus.com.
+ * There should be a copy of the license included with this file. If a copy
+ * of the license is not included you are granted no right to distribute or
+ * otherwise use this file except through a legal and valid license. You
+ * should also contact Syncleus, Inc. at the information below if you cannot
+ * find a license:
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Syncleus, Inc.
+ * 2604 South 12th Street
+ * Philadelphia, PA 19148
  */
-package com.github.joelittlejohn.embedmongo;
+package com.syncleus.maven.plugins.mongodb;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -37,7 +38,7 @@ public class PortUtilsTest {
 
     /**
      * This test executes method
-     * {@link com.github.joelittlejohn.embedmongo.PortUtils#allocateRandomPort()}
+     * {@link PortUtils#allocateRandomPort()}
      * many times concurrently to make sure that port allocation works correctly
      * under stress.
      */

@@ -1,4 +1,4 @@
-embedmongo-maven-plugin [![Build Status](https://travis-ci.org/joelittlejohn/embedmongo-maven-plugin.png)](https://travis-ci.org/joelittlejohn/embedmongo-maven-plugin)
+maven-mongodb-plugin
 =======================
 
 Maven plugin wrapper for the [flapdoodle.de embedded MongoDB API](http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de).
@@ -10,9 +10,9 @@ Usage
 
 ```xml
 <plugin>
-    <groupId>com.github.joelittlejohn.embedmongo</groupId>
-    <artifactId>embedmongo-maven-plugin</artifactId>
-    <version>0.1.12</version>
+    <groupId>com.syncleus.maven.plugins</groupId>
+    <artifactId>maven-mongodb-plugin</artifactId>
+    <version>1.0.0</version>
     <executions>
         <execution>
             <id>start</id>

@@ -1,19 +1,20 @@
 /**
- * Copyright © 2012 Joe Littlejohn
+ * Copyright: (c) Syncleus, Inc.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * You may redistribute and modify this source code under the terms and
+ * conditions of the Open Source Community License - Type C version 1.0
+ * or any later version as published by Syncleus, Inc. at www.syncleus.com.
+ * There should be a copy of the license included with this file. If a copy
+ * of the license is not included you are granted no right to distribute or
+ * otherwise use this file except through a legal and valid license. You
+ * should also contact Syncleus, Inc. at the information below if you cannot
+ * find a license:
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * Syncleus, Inc.
+ * 2604 South 12th Street
+ * Philadelphia, PA 19148
  */
-package com.github.joelittlejohn.embedmongo;
+package com.syncleus.maven.plugins.mongodb;
 
 import static java.util.Collections.*;
 
@@ -35,8 +36,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
-import com.github.joelittlejohn.embedmongo.log.Loggers;
-import com.github.joelittlejohn.embedmongo.log.Loggers.LoggingStyle;
+import com.syncleus.maven.plugins.mongodb.log.Loggers;
+import com.syncleus.maven.plugins.mongodb.log.Loggers.LoggingStyle;
 
 import de.flapdoodle.embed.mongo.Command;
 import de.flapdoodle.embed.mongo.MongodExecutable;
@@ -64,23 +65,23 @@ import de.flapdoodle.embed.process.store.IArtifactStore;
 
 /**
  * When invoked, this goal starts an instance of mongo. The required binaries
- * are downloaded if no mongo release is found in <code>~/.embedmongo</code>.
+ * are downloaded if no mongo release is found in <code>~/.mongodb</code>.
  * 
  * @goal start
  * @phase pre-integration-test
  * @see <a
  *      href="http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de">http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de</a>
  */
-public class StartEmbeddedMongoMojo extends AbstractMojo {
+public class StartMongoMojo extends AbstractMojo {
 
-    private static final String PACKAGE_NAME = StartEmbeddedMongoMojo.class.getPackage().getName();
+    private static final String PACKAGE_NAME = StartMongoMojo.class.getPackage().getName();
     public static final String MONGOD_CONTEXT_PROPERTY_NAME = PACKAGE_NAME + ".mongod";
 
     /**
      * The port MongoDB should run on.
      * 
-     * @parameter expression="${embedmongo.port}" default-value="27017"
-     * @since 0.1.0
+     * @parameter expression="${mongodb.port}" default-value="27017"
+     * @since 1.0.0
      */
     private int port;
 
@@ -90,24 +91,24 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
      * random port chosen will be available in the Maven project property
      * {@code embedmongo.port}.
      * 
-     * @parameter expression="${embedmongo.randomPort}" default-value="false"
-     * @since 0.1.8
+     * @parameter expression="${mongodb.randomPort}" default-value="false"
+     * @since 1.0.0
      */
     private boolean randomPort;
 
     /**
      * The version of MongoDB to run e.g. 2.1.1, 1.6 v1.8.2, V2_0_4,
      * 
-     * @parameter expression="${embedmongo.version}" default-value="2.2.1"
-     * @since 0.1.0
+     * @parameter expression="${mongodb.version}" default-value="3.0.3"
+     * @since 1.0.0
      */
     private String version;
 
     /**
      * The location of a directory that will hold the MongoDB data files.
      * 
-     * @parameter expression="${embedmongo.databaseDirectory}"
-     * @since 0.1.0
+     * @parameter expression="${mongodb.databaseDirectory}"
+     * @since 1.0.0
      */
     private File databaseDirectory;
 
@@ -115,24 +116,24 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
      * An IP address for the MongoDB instance to be bound to during its
      * execution.
      * 
-     * @parameter expression="${embedmongo.bindIp}"
-     * @since 0.1.4
+     * @parameter expression="${mongodb.bindIp}"
+     * @since 1.0.0
      */
     private String bindIp;
 
     /**
      * A proxy hostname to be used when downloading MongoDB distributions.
      * 
-     * @parameter expression="${embedmongo.proxyHost}"
-     * @since 0.1.1
+     * @parameter expression="${mongodb.proxyHost}"
+     * @since 1.0.0
      */
     private String proxyHost;
 
     /**
      * A proxy port to be used when downloading MongoDB distributions.
      * 
-     * @parameter expression="${embedmongo.proxyPort}" default-value="80"
-     * @since 0.1.1
+     * @parameter expression="${mongodb.proxyPort}" default-value="80"
+     * @since 1.0.0
      */
     private int proxyPort;
 
@@ -141,60 +142,60 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
      * {@literal <ctrl-c>}). This option makes this goal similar in spirit to
      * something like jetty:run, useful for interactive debugging.
      * 
-     * @parameter expression="${embedmongo.wait}" default-value="false"
-     * @since 0.1.2
+     * @parameter expression="${mongodb.wait}" default-value="false"
+     * @since 1.0.0
      */
     private boolean wait;
 
     /**
-     * @parameter expression="${embedmongo.logging}" default-value="console"
-     * @since 0.1.3
+     * @parameter expression="${mongodb.logging}" default-value="console"
+     * @since 1.0.0
      */
     private String logging;
 
     /**
-     * @parameter expression="${embedmongo.logFile}"
+     * @parameter expression="${mongodb.logFile}"
      *            default-value="embedmongo.log"
-     * @since 0.1.7
+     * @since 1.0.0
      */
     private String logFile;
 
     /**
-     * @parameter expression="${embedmongo.logFileEncoding}"
+     * @parameter expression="${mongodb.logFileEncoding}"
      *            default-value="utf-8"
-     * @since 0.1.7
+     * @since 1.0.0
      */
     private String logFileEncoding;
 
     /**
      * The base URL to be used when downloading MongoDB
      * 
-     * @parameter expression="${embedmongo.downloadPath}"
+     * @parameter expression="${mongodb.downloadPath}"
      *            default-value="http://fastdl.mongodb.org/"
-     * @since 0.1.10
+     * @since 1.0.0
      */
     private String downloadPath;
 
     /**
      * The proxy user to be used when downloading MongoDB
      * 
-     * @parameter expression="${embedmongo.proxyUser}"
-     * @since 0.1.6
+     * @parameter expression="${mongodb.proxyUser}"
+     * @since 1.0.0
      */
     private String proxyUser;
 
     /**
      * The proxy password to be used when downloading MondoDB
      * 
-     * @parameter expression="${embedmongo.proxyPassword}"
-     * @since 0.1.6
+     * @parameter expression="${mongodb.proxyPassword}"
+     * @since 1.0.0
      */
     private String proxyPassword;
 
     /**
      * Should authorization be enabled for MongoDB
      * 
-     * @parameter expression="${embedmongo.authEnabled}" default-value="false"
+     * @parameter expression="${mongodb.authEnabled}" default-value="false"
      */
     private boolean authEnabled;
 
@@ -207,7 +208,7 @@ public class StartEmbeddedMongoMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * @parameter expression="${embedmongo.skip}" default-value="false"
+     * @parameter expression="${mongodb.skip}" default-value="false"
      */
     private boolean skip;
 
