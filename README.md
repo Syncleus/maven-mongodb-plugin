@@ -71,6 +71,9 @@ Usage
                 
                 <executableNaming>user</executableNaming>
                 <!-- optional (user|uuid), sets the executable naming style, default is uuid -->
+                
+                <syncDelay>0</syncDelay>
+                <!-- optional, Sets the sync delay, 0 prevents all writing to disk, default lets MongoDB automatically determine value -->
 
                 <skip>false</skip>
                 <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->

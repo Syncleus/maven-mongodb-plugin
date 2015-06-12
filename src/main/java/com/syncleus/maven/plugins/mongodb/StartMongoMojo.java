@@ -23,6 +23,7 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.*;
+import de.flapdoodle.embed.mongo.config.processlistener.ProcessListenerBuilder;
 import de.flapdoodle.embed.mongo.distribution.Feature;
 import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
@@ -226,6 +227,14 @@ public class StartMongoMojo extends AbstractMojo {
     private String artifactDirectory;
 
     /**
+     * Specifies the sync delay for MongoDB, 0 never syncs to disk, no value indicates default.
+     *
+     * @since 1.0.0
+     */
+    @Parameter(property = "mongodb.syncDelay")
+    private Integer syncDelay;
+
+    /**
      * The maven project.
      *
      * @since 1.0.0
@@ -234,20 +243,20 @@ public class StartMongoMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * A list of the MongoDB features enabled.
-     *
-     * @since 1.0.0
-     */
-    @Parameter
-    private String[] features;
-
-    /**
      * If true the plugin does nothing at all, allows you to skip from the command line.
      *
      * @since 1.0.0
      */
     @Parameter(property = "mongodb.skip", defaultValue = "false")
     private boolean skip;
+
+    /**
+     * A list of the MongoDB features enabled.
+     *
+     * @since 1.0.0
+     */
+    @Parameter
+    private String[] features;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -291,11 +300,25 @@ public class StartMongoMojo extends AbstractMojo {
             }
             savePortToProjectProperties();
 
-            final IMongodConfig config = new MongodConfigBuilder()
+            MongodConfigBuilder configBuilder = new MongodConfigBuilder()
                 .version(getVersion())
                 .net(new Net(bindIp, port, Network.localhostIsIPv6()))
-                .replication(new Storage(getDataDirectory(), replSet, oplogSize))
-                .build();
+                .replication(new Storage(getDataDirectory(), replSet, oplogSize));
+
+            if(this.syncDelay == null) {
+                configBuilder = configBuilder
+                    .cmdOptions(new MongoCmdOptionsBuilder()
+                        .defaultSyncDelay()
+                        .build());
+            }
+            else if(this.syncDelay > 0) {
+                configBuilder = configBuilder
+                    .cmdOptions(new MongoCmdOptionsBuilder()
+                        .syncDelay(this.syncDelay)
+                        .build());
+            }
+            final IMongodConfig config = configBuilder.build();
+
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
         } catch (final UnknownHostException e) {
@@ -433,7 +456,10 @@ public class StartMongoMojo extends AbstractMojo {
             };
         }
 
-        return Versions.withFeatures(determinedVersion, (featuresSet.isEmpty() ? null : (Feature[]) featuresSet.toArray()));
+        if(featuresSet.isEmpty())
+            return Versions.withFeatures(determinedVersion);
+        else
+            return Versions.withFeatures(determinedVersion, (Feature[]) featuresSet.toArray());
     }
 
     private String getDataDirectory() {
