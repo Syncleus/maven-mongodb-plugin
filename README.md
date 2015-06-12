@@ -75,6 +75,10 @@ Usage
                 
                 <syncDelay>0</syncDelay>
                 <!-- optional, Sets the sync delay, 0 prevents all writing to disk, default lets MongoDB automatically determine value -->
+                
+                <wait>true</wait>
+                <!-- optional, blocks indefinitely after the MongoDB instance starts, must be stopped with ctrl-c, 
+                 default is false-->
 
                 <skip>false</skip>
                 <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->
@@ -105,4 +109,4 @@ Notes
   If you're using Jenkins, you can also try the [Port Allocator Plugin](https://wiki.jenkins-ci.org/display/JENKINS/Port+Allocator+Plugin).
 * If you need to use a proxy to download MongoDB then you can either use `-Dhttp.proxyHost` and `-Dhttp.proxyPort` as additional Maven arguments (this will affect the entire build) or instruct the plugin to use a proxy when downloading Mongo by adding the `proxyHost` and `proxyPort` configuration properties.
 * If you're having trouble with Windows firewall rules, try setting the _bindIp_ config property to `127.0.0.1`.
-* If you'd like the start goal to start mongodb and wait, you can add `-Dembedmongo.wait` to your Maven command line arguments
+* If you'd like the start goal to start mongodb and wait, you can add `-Dmongodb.wait` to your Maven command line arguments
