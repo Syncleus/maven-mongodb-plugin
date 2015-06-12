@@ -32,6 +32,11 @@ import de.flapdoodle.embed.process.config.store.IDownloadConfig;
 import de.flapdoodle.embed.process.distribution.Distribution;
 import de.flapdoodle.embed.process.distribution.IVersion;
 import de.flapdoodle.embed.process.exceptions.DistributionException;
+import de.flapdoodle.embed.process.extract.ITempNaming;
+import de.flapdoodle.embed.process.extract.UUIDTempNaming;
+import de.flapdoodle.embed.process.extract.UserTempNaming;
+import de.flapdoodle.embed.process.io.directories.FixedPath;
+import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.runtime.Network;
 import de.flapdoodle.embed.process.store.IArtifactStore;
@@ -133,6 +138,8 @@ public class StartMongoMojo extends AbstractMojo {
     private boolean wait;
 
     /**
+     * Specifies where log output goes to. Must be one of the following: file, console, none.
+     *
      * @parameter expression="${mongodb.logging}" default-value="console"
      * @since 1.0.0
      */
@@ -197,6 +204,22 @@ public class StartMongoMojo extends AbstractMojo {
      * @parameter expression="${mongodb.oplogSize}" default-value="0"
      */
     private int oplogSize;
+
+    /**
+     * Specifies the executable naming policy used. Must be one of the following values: uuid, user.
+     *
+     * @parameter expression="${mongodb.executableNaming}" default-value="uuid"
+     * @since 1.0.0
+     */
+    private String executableNaming;
+
+    /**
+     * Specifies the directory to which MongoDB executables are stores.
+     *
+     * @parameter expression="${mongodb.artifactDirectory}"
+     * @since 1.0.0
+     */
+    private String artifactDirectory;
 
     /**
      * The maven project.
@@ -314,9 +337,23 @@ public class StartMongoMojo extends AbstractMojo {
 
     }
 
-    private IArtifactStore getArtifactStore() {
-        final IDownloadConfig downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath).build();
-        return new ArtifactStoreBuilder().defaults(Command.MongoD).download(downloadConfig).build();
+    private IArtifactStore getArtifactStore() throws MojoFailureException {
+        final ITempNaming naming;
+        if(executableNaming == null)
+            throw new IllegalStateException("executableNaming should never be null!");
+        if(executableNaming.equals("uuid"))
+            naming = new UUIDTempNaming();
+        else if(executableNaming.equals("user"))
+            naming = new UserTempNaming();
+        else
+            throw new MojoFailureException("Unexpected executable naming type encountered: \"" + executableNaming + "\"");
+
+        de.flapdoodle.embed.process.config.store.DownloadConfigBuilder downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath);
+        if(artifactDirectory != null ) {
+            IDirectory storePath = new FixedPath(artifactDirectory);
+            downloadConfig = downloadConfig.artifactStorePath(storePath);
+        }
+        return new ArtifactStoreBuilder().defaults(Command.MongoD).download(downloadConfig.build()).executableNaming(naming).build();
     }
 
     private void addProxySelector() {
