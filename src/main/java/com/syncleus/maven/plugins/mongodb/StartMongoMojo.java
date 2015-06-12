@@ -23,6 +23,7 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.*;
+import de.flapdoodle.embed.mongo.distribution.Feature;
 import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
 import de.flapdoodle.embed.mongo.distribution.Versions;
@@ -50,6 +51,7 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -232,6 +234,14 @@ public class StartMongoMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
+     * A list of the MongoDB features enabled.
+     *
+     * @since 1.0.0
+     */
+    @Parameter
+    private String[] features;
+
+    /**
      * If true the plugin does nothing at all, allows you to skip from the command line.
      *
      * @since 1.0.0
@@ -391,8 +401,18 @@ public class StartMongoMojo extends AbstractMojo {
     }
 
     private IFeatureAwareVersion getVersion() {
-        if(this.version == null || this.version.equals(""))
-            return Version.Main.PRODUCTION;
+
+        final HashSet<Feature> featuresSet = new HashSet<Feature>();
+        if(this.features != null && this.features.length > 0) {
+            for(final String featureString : this.features)
+                featuresSet.add(Feature.valueOf(featureString.toUpperCase()));
+        }
+
+        if(this.version == null || this.version.equals("")) {
+            if(featuresSet.isEmpty())
+                return Version.Main.PRODUCTION;
+            this.version = Version.Main.PRODUCTION.asInDownloadPath();
+        }
 
         String versionEnumName = this.version.toUpperCase().replaceAll("\\.", "_");
 
@@ -400,18 +420,20 @@ public class StartMongoMojo extends AbstractMojo {
             versionEnumName = "V" + versionEnumName;
         }
 
+        IVersion determinedVersion;
         try {
-            return Version.valueOf(versionEnumName);
+            determinedVersion = Version.valueOf(versionEnumName);
         } catch (final IllegalArgumentException e) {
             getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
-            return Versions.withFeatures(new IVersion() {
+            determinedVersion = new IVersion() {
                 @Override
                 public String asInDownloadPath() {
                     return version;
                 }
-            });
+            };
         }
 
+        return Versions.withFeatures(determinedVersion, (featuresSet.isEmpty() ? null : (Feature[]) featuresSet.toArray()));
     }
 
     private String getDataDirectory() {

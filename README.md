@@ -74,6 +74,12 @@ Usage
 
                 <skip>false</skip>
                 <!-- optional, skips this plugin entirely, use on the command line like -Dembedmongo.skip -->
+                
+                <features>
+                    <feature>sync_delay</feature>
+                    <feature>text_search</feature>
+                </features>
+                <!-- optional, a list of MongoDB features to enable, default is none -->
             </configuration>
         </execution>
         <execution>
