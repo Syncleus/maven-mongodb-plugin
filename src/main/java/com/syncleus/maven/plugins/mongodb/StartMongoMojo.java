@@ -16,6 +16,9 @@
  */
 package com.syncleus.maven.plugins.mongodb;
 
+import com.mongodb.CommandResult;
+import com.mongodb.MongoClient;
+import com.mongodb.MongoException;
 import com.syncleus.maven.plugins.mongodb.log.Loggers;
 import com.syncleus.maven.plugins.mongodb.log.Loggers.LoggingStyle;
 import de.flapdoodle.embed.mongo.*;
@@ -45,13 +48,16 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import com.mongodb.DB;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.singletonList;
@@ -259,6 +265,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private Integer setPort = null;
 
+    private InitDataConfig[] initalizations;
+
     @Override
     @SuppressWarnings("unchecked")
     public void start() throws MojoExecutionException, MojoFailureException {
@@ -282,8 +290,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
         }
 
-        if(this.imports != null && imports.length > 0)
-            sendImportScript();
+        startImport();
+        startInitialization();
 
         try {
             final MongodProcess mongod = executable.start();
@@ -312,7 +320,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
         try {
             MongodConfigBuilder configBuilder = new MongodConfigBuilder()
                 .version(createVersion())
-                .net(new Net(bindIp, port, Network.localhostIsIPv6()))
+                .net(new Net(bindIp, getPort(), Network.localhostIsIPv6()))
                 .replication(new Storage(getDataDirectory(), replSet, oplogSize));
 
             configBuilder = this.configureSyncDelay(configBuilder);
@@ -472,7 +480,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
             for(final String featureString : this.features)
                 featuresSet.add(Feature.valueOf(featureString.toUpperCase()));
         }
-        return (Feature[]) featuresSet.toArray();
+        final Feature[] retVal = new Feature[featuresSet.size()];
+        return featuresSet.toArray(retVal);
     }
 
     private int getPort() {
@@ -483,7 +492,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             setPort = PortUtils.allocateRandomPort();
         else
             setPort = Integer.valueOf(port);
-        project.getProperties().put("mongodb.port", setPort);
+        project.getProperties().put("mongodb.port", String.valueOf(setPort));
         return setPort;
     }
 
@@ -495,14 +504,11 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
-    private void sendImportScript() throws MojoExecutionException {
-        List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
-
-        if(imports == null || imports.length == 0) {
-            getLog().error("No imports found, check your configuration");
-
+    private void startImport() throws MojoExecutionException {
+        if(imports == null || imports.length == 0)
             return;
-        }
+
+        List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
 
         getLog().info("Default import database: " + defaultImportDatabase);
 
@@ -578,5 +584,73 @@ public class StartMongoMojo extends AbstractMongoMojo {
             "\t\t<collection>[my file]</collection>\n" +
             "...");
 
+    }
+
+    private void startInitialization() throws MojoExecutionException, MojoFailureException {
+        if(initalizations == null || initalizations.length == 0)
+            return;
+
+        for(final InitDataConfig initConfig : this.initalizations ) {
+            DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
+
+            for(final File scriptFile : initConfig.getScripts()) {
+                if(scriptFile.isDirectory())
+                    this.processScriptDirectory(db, scriptFile);
+                else
+                    this.processScriptFile(db, scriptFile);
+            }
+        }
+    }
+
+    private DB connectToMongoAndGetDatabase(final String databaseName) throws MojoExecutionException {
+        if (databaseName == null || databaseName.trim().length() == 0) {
+            throw new MojoExecutionException("Database name is missing");
+        }
+
+        MongoClient mongoClient;
+        try {
+            mongoClient = new MongoClient("localhost", getPort());
+        } catch (UnknownHostException e) {
+            throw new MojoExecutionException("Unable to connect to mongo instance", e);
+        }
+        getLog().info("Connected to MongoDB");
+        return mongoClient.getDB(databaseName);
+    }
+
+    private void processScriptDirectory(final DB db, final File scriptDirectory) throws MojoExecutionException {
+        File[] files = scriptDirectory.listFiles();
+        getLog().info("Folder " + scriptDirectory.getAbsolutePath() + " contains " + files.length + " file(s):");
+        for (File file : files) {
+            this.processScriptFile(db, file);
+        }
+        getLog().info("Data initialized with success");
+    }
+
+    private void processScriptFile(final DB db, final File scriptFile) throws MojoExecutionException {
+        Scanner scanner = null;
+        StringBuilder instructions = new StringBuilder();
+        try {
+            scanner = new Scanner(scriptFile);
+            while (scanner.hasNextLine()) {
+                instructions.append(scanner.nextLine()).append("\n");
+            }
+        } catch (FileNotFoundException e) {
+            throw new MojoExecutionException("Unable to find file with name '" + scriptFile.getName() + "'", e);
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
+        CommandResult result;
+        try {
+            result = db.doEval("(function() {" + instructions.toString() + "})();", new Object[0]);
+        } catch (MongoException e) {
+            throw new MojoExecutionException("Unable to execute file with name '" + scriptFile.getName() + "'", e);
+        }
+        if (!result.ok()) {
+            getLog().error("- file " + scriptFile.getName() + " parsed with error: " + result.getErrorMessage());
+            throw new MojoExecutionException("Error while executing instructions from file '" + scriptFile.getName() + "': " + result.getErrorMessage(), result.getException());
+        }
+        getLog().info("- file " + scriptFile.getName() + " parsed successfully");
     }
 }

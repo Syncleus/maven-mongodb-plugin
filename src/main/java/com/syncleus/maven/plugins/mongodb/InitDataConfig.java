@@ -1,6 +1,6 @@
 /**
  * Copyright: (c) Syncleus, Inc.
- * <p/>
+ *
  * You may redistribute and modify this source code under the terms and
  * conditions of the Open Source Community License - Type C version 1.0
  * or any later version as published by Syncleus, Inc. at www.syncleus.com.
@@ -9,31 +9,30 @@
  * otherwise use this file except through a legal and valid license. You
  * should also contact Syncleus, Inc. at the information below if you cannot
  * find a license:
- * <p/>
+ *
  * Syncleus, Inc.
  * 2604 South 12th Street
  * Philadelphia, PA 19148
  */
 package com.syncleus.maven.plugins.mongodb;
 
-import org.junit.After;
-import org.junit.Test;
+import java.io.File;
 
-import java.net.Socket;
+public class InitDataConfig {
+    private File[] scripts;
 
-public class MongoIT {
+    private String databaseName;
 
-    private Socket mongoSocket;
-
-    @Test
-    public void testConnectMongo() throws Exception {
-        mongoSocket = new Socket("127.0.0.1", Integer.valueOf(System.getProperty("mongodb.port")));
+    public InitDataConfig(File[] scripts, String databaseName) {
+        this.scripts = scripts;
+        this.databaseName = databaseName;
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if (mongoSocket != null) {
-            mongoSocket.close();
-        }
+    public File[] getScripts() {
+        return scripts;
+    }
+
+    public String getDatabaseName() {
+        return databaseName;
     }
 }

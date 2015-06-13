@@ -80,7 +80,7 @@
                         </goals>
                         <configuration>
                             <systemPropertyVariables>
-                                <mongo.port>${mongodb.port}</mongo.port>
+                                <mongodb.port>${mongodb.port}</mongodb.port>
                             </systemPropertyVariables>
                         </configuration>
                     </execution>
