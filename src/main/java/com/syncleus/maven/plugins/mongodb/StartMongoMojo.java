@@ -23,7 +23,6 @@ import de.flapdoodle.embed.mongo.MongodExecutable;
 import de.flapdoodle.embed.mongo.MongodProcess;
 import de.flapdoodle.embed.mongo.MongodStarter;
 import de.flapdoodle.embed.mongo.config.*;
-import de.flapdoodle.embed.mongo.config.processlistener.ProcessListenerBuilder;
 import de.flapdoodle.embed.mongo.distribution.Feature;
 import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
 import de.flapdoodle.embed.mongo.distribution.Version;
@@ -66,7 +65,7 @@ import static java.util.Collections.singletonList;
  * href="http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de">http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de</a>
  */
 @Mojo(name = "start", defaultPhase = LifecyclePhase.PRE_INTEGRATION_TEST)
-public class StartMongoMojo extends AbstractMojo {
+public class StartMongoMojo extends AbstractMongoMojo {
 
     private static final String PACKAGE_NAME = StartMongoMojo.class.getPackage().getName();
     public static final String MONGOD_CONTEXT_PROPERTY_NAME = PACKAGE_NAME + ".mongod";
@@ -243,14 +242,6 @@ public class StartMongoMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * If true the plugin does nothing at all, allows you to skip from the command line.
-     *
-     * @since 1.0.0
-     */
-    @Parameter(property = "mongodb.skip", defaultValue = "false")
-    private boolean skip;
-
-    /**
      * A list of the MongoDB features enabled.
      *
      * @since 1.0.0
@@ -260,12 +251,7 @@ public class StartMongoMojo extends AbstractMojo {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void execute() throws MojoExecutionException, MojoFailureException {
-
-        if (skip) {
-            getLog().debug("skip=true, not starting mongodb");
-            return;
-        }
+    public void start() throws MojoExecutionException, MojoFailureException {
 
         if (this.proxyHost != null && this.proxyHost.length() > 0) {
             this.addProxySelector();
