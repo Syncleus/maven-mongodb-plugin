@@ -14,6 +14,12 @@
  * 2604 South 12th Street
  * Philadelphia, PA 19148
  */
+
+/*
+ * Derived from APACHE LICENSE version 2.0 source as indicated at
+ * https://github.com/joelittlejohn/embedmongo-maven-plugin as of 5/16/2015.
+ * Original source was Copyright (c) 2012 Joe Littlejohn
+ */
 package com.syncleus.maven.plugins.mongodb;
 
 import de.flapdoodle.embed.mongo.MongodProcess;
