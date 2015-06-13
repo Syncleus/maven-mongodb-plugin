@@ -17,6 +17,7 @@
 package com.syncleus.maven.plugins.mongodb;
 
 import com.mongodb.CommandResult;
+import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.syncleus.maven.plugins.mongodb.log.Loggers;
@@ -48,7 +49,6 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-import com.mongodb.DB;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -195,21 +195,18 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     /**
      * Should authorization be enabled for MongoDB
-     *
      */
     @Parameter(property = "mongodb.authEnabled", defaultValue = "false")
     private boolean authEnabled;
 
     /**
      * Sets a value for the --replSet
-     *
      */
     @Parameter(property = "mongodb.replSet")
     private String replSet;
 
     /**
      * Set the size for the MongoDB oplog
-     *
      */
     @Parameter(property = "mongodb.oplogSize", defaultValue = "0")
     private int oplogSize;
@@ -261,11 +258,70 @@ public class StartMongoMojo extends AbstractMongoMojo {
     private String defaultImportDatabase;
 
     @Parameter(property = "mongodb.parallel", defaultValue = "false")
-    private Boolean parallelImport;
+    private boolean parallelImport;
 
     private Integer setPort = null;
 
-    private InitalizerConfig[] initalizations;
+    private InitializerConfig[] initalizations;
+
+    StartMongoMojo(int port,
+                   boolean randomPort,
+                   String version,
+                   File databaseDirectory,
+                   String bindIp,
+                   String proxyHost,
+                   int proxyPort,
+                   boolean wait,
+                   String logging,
+                   String logFile,
+                   String logFileEncoding,
+                   String downloadPath,
+                   String proxyUser,
+                   String proxyPassword,
+                   boolean authEnabled,
+                   String replSet,
+                   int oplogSize,
+                   String executableNaming,
+                   String artifactDirectory,
+                   Integer syncDelay,
+                   MavenProject project,
+                   String[] features,
+                   ImportDataConfig[] imports,
+                   String defaultImportDatabase,
+                   boolean parallelImport,
+                   Integer setPort,
+                   InitializerConfig[] initalizations,
+                   boolean skip) {
+
+        super(skip);
+        this.port = port;
+        this.randomPort = randomPort;
+        this.version = version;
+        this.databaseDirectory = databaseDirectory;
+        this.bindIp = bindIp;
+        this.proxyHost = proxyHost;
+        this.proxyPort = proxyPort;
+        this.wait = wait;
+        this.logging = logging;
+        this.logFile = logFile;
+        this.logFileEncoding = logFileEncoding;
+        this.downloadPath = downloadPath;
+        this.proxyUser = proxyUser;
+        this.proxyPassword = proxyPassword;
+        this.authEnabled = authEnabled;
+        this.replSet = replSet;
+        this.oplogSize = oplogSize;
+        this.executableNaming = executableNaming;
+        this.artifactDirectory = artifactDirectory;
+        this.syncDelay = syncDelay;
+        this.project = project;
+        this.features = features;
+        this.imports = imports;
+        this.defaultImportDatabase = defaultImportDatabase;
+        this.parallelImport = parallelImport;
+        this.setPort = setPort;
+        this.initalizations = initalizations;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
@@ -285,8 +341,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
-        }
-        catch (final DistributionException e) {
+        } catch (final DistributionException e) {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
         }
 
@@ -297,8 +352,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
             final MongodProcess mongod = executable.start();
 
             this.executeWait();
-
-            getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
+            if(getPluginContext() != null)
+                getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
         } catch (final IOException e) {
             throw new MojoExecutionException("Unable to start the mongod", e);
         }
@@ -326,27 +381,23 @@ public class StartMongoMojo extends AbstractMongoMojo {
             configBuilder = this.configureSyncDelay(configBuilder);
 
             return configBuilder.build();
-        }
-        catch (final UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             throw new MojoExecutionException("Unable to determine if localhost is ipv6", e);
-        }
-        catch (final IOException e) {
+        } catch (final IOException e) {
             throw new MojoExecutionException("Unable to Config MongoDB: ", e);
         }
     }
 
     private MongodConfigBuilder configureSyncDelay(final MongodConfigBuilder config) {
-        if(this.syncDelay == null) {
+        if (this.syncDelay == null) {
             return config.cmdOptions(new MongoCmdOptionsBuilder()
-                    .defaultSyncDelay()
-                    .build());
-        }
-        else if(this.syncDelay > 0) {
+                .defaultSyncDelay()
+                .build());
+        } else if (this.syncDelay > 0) {
             return config.cmdOptions(new MongoCmdOptionsBuilder()
-                    .syncDelay(this.syncDelay)
-                    .build());
-        }
-        else
+                .syncDelay(this.syncDelay)
+                .build());
+        } else
             return config;
     }
 
@@ -393,17 +444,17 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private IArtifactStore createArtifactStore() throws MojoFailureException {
         final ITempNaming naming;
-        if(executableNaming == null)
+        if (executableNaming == null)
             throw new IllegalStateException("executableNaming should never be null!");
-        else if(executableNaming.equals("uuid"))
+        else if (executableNaming.equals("uuid"))
             naming = new UUIDTempNaming();
-        else if(executableNaming.equals("user"))
+        else if (executableNaming.equals("user"))
             naming = new UserTempNaming();
         else
             throw new MojoFailureException("Unexpected executable naming type encountered: \"" + executableNaming + "\"");
 
         de.flapdoodle.embed.process.config.store.DownloadConfigBuilder downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath);
-        if(artifactDirectory != null ) {
+        if (artifactDirectory != null) {
             final IDirectory storePath = new FixedPath(artifactDirectory);
             downloadConfig = downloadConfig.artifactStorePath(storePath);
         }
@@ -414,8 +465,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
         final Feature[] features = getFeatures();
 
-        if(this.version == null || this.version.equals("")) {
-            if(features.length == 0)
+        if (this.version == null || this.version.equals("")) {
+            if (features.length == 0)
                 return Version.Main.PRODUCTION;
             this.version = Version.Main.PRODUCTION.asInDownloadPath();
         }
@@ -439,7 +490,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             };
         }
 
-        if(features.length == 0)
+        if (features.length == 0)
             return Versions.withFeatures(determinedVersion);
         else
             return Versions.withFeatures(determinedVersion, features);
@@ -476,8 +527,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private Feature[] getFeatures() {
         final HashSet<Feature> featuresSet = new HashSet<Feature>();
-        if(this.features != null && this.features.length > 0) {
-            for(final String featureString : this.features)
+        if (this.features != null && this.features.length > 0) {
+            for (final String featureString : this.features)
                 featuresSet.add(Feature.valueOf(featureString.toUpperCase()));
         }
         final Feature[] retVal = new Feature[featuresSet.size()];
@@ -485,7 +536,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
     }
 
     private int getPort() {
-        if( setPort != null )
+        if (setPort != null)
             return setPort;
 
         if (randomPort)
@@ -505,21 +556,21 @@ public class StartMongoMojo extends AbstractMongoMojo {
     }
 
     private void startImport() throws MojoExecutionException {
-        if(imports == null || imports.length == 0)
+        if (imports == null || imports.length == 0)
             return;
 
         final List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
 
         getLog().info("Default import database: " + defaultImportDatabase);
 
-        for(final ImportDataConfig importData: imports) {
+        for (final ImportDataConfig importData : imports) {
 
             getLog().info("Import " + importData);
 
             verify(importData);
             String database = importData.getDatabase();
 
-            if(StringUtils.isBlank(database)){
+            if (StringUtils.isBlank(database)) {
                 database = defaultImportDatabase;
             }
 
@@ -540,18 +591,17 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
                 final MongoImportProcess importProcess = mongoImport.start();
 
-                if(parallelImport)
+                if (parallelImport)
                     pendingMongoProcess.add(importProcess);
                 else
                     waitFor(importProcess);
-            }
-            catch (final IOException e) {
+            } catch (final IOException e) {
                 throw new MojoExecutionException("Unexpected IOException encountered", e);
             }
 
         }
 
-        for(final MongoImportProcess importProcess: pendingMongoProcess)
+        for (final MongoImportProcess importProcess : pendingMongoProcess)
             waitFor(importProcess);
 
     }
@@ -560,12 +610,11 @@ public class StartMongoMojo extends AbstractMongoMojo {
         try {
             final int code = importProcess.waitFor();
 
-            if(code != 0)
+            if (code != 0)
                 throw new MojoExecutionException("Cannot import '" + importProcess.getConfig().getImportFile() + "'");
 
             getLog().info("Import return code: " + code);
-        }
-        catch (final InterruptedException e) {
+        } catch (final InterruptedException e) {
             throw new MojoExecutionException("Thread execution interrupted", e);
         }
 
@@ -587,14 +636,14 @@ public class StartMongoMojo extends AbstractMongoMojo {
     }
 
     private void startInitialization() throws MojoExecutionException, MojoFailureException {
-        if(initalizations == null || initalizations.length == 0)
+        if (initalizations == null || initalizations.length == 0)
             return;
 
-        for(final InitalizerConfig initConfig : this.initalizations ) {
+        for (final InitializerConfig initConfig : this.initalizations) {
             final DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
 
-            for(final File scriptFile : initConfig.getScripts()) {
-                if(scriptFile.isDirectory())
+            for (final File scriptFile : initConfig.getScripts()) {
+                if (scriptFile.isDirectory())
                     this.processScriptDirectory(db, scriptFile);
                 else
                     this.processScriptFile(db, scriptFile);
@@ -602,7 +651,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
-    private DB connectToMongoAndGetDatabase(final String databaseName) throws MojoExecutionException {
+    DB connectToMongoAndGetDatabase(final String databaseName) throws MojoExecutionException {
         if (databaseName == null || databaseName.trim().length() == 0) {
             throw new MojoExecutionException("Database name is missing");
         }

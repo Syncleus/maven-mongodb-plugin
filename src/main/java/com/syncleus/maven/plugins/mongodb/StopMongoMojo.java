@@ -31,6 +31,11 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 @Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST)
 public class StopMongoMojo extends AbstractMongoMojo {
+
+    StopMongoMojo(boolean skip) {
+        super(skip);
+    }
+
     @Override
     public void start() throws MojoExecutionException, MojoFailureException {
         final MongodProcess mongod = (MongodProcess) getPluginContext().get(StartMongoMojo

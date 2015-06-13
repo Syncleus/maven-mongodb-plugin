@@ -30,6 +30,10 @@ public abstract class AbstractMongoMojo extends AbstractMojo {
     @Parameter(property = "mongodb.skip", defaultValue = "false")
     private boolean skip;
 
+    protected AbstractMongoMojo(final boolean skip) {
+        this.skip = skip;
+    }
+
     @Override
     public final void execute() throws MojoExecutionException, MojoFailureException {
         if (skip) {
