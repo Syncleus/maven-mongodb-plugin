@@ -40,7 +40,6 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.runtime.Network;
 import de.flapdoodle.embed.process.store.IArtifactStore;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -259,74 +258,25 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
         final MongodExecutable executable;
         try {
+            final IRuntimeConfig runtimeConfig = createRuntimeConfig();
 
-            final ICommandLinePostProcessor commandLinePostProcessor;
-            if (authEnabled) {
-                commandLinePostProcessor = new ICommandLinePostProcessor() {
-                    @Override
-                    public List<String> process(final Distribution distribution, final List<String> args) {
-                        args.remove("--noauth");
-                        args.add("--auth");
-                        return args;
-                    }
-                };
-            } else {
-                commandLinePostProcessor = new ICommandLinePostProcessor.Noop();
-            }
-
-            final IRuntimeConfig runtimeConfig = new RuntimeConfigBuilder()
-                .defaults(Command.MongoD)
-                .processOutput(getOutputConfig())
-                .artifactStore(getArtifactStore())
-                .commandLinePostProcessor(commandLinePostProcessor)
-                .build();
-
-            if (randomPort) {
+            if (randomPort)
                 port = PortUtils.allocateRandomPort();
-            }
             savePortToProjectProperties();
 
-            MongodConfigBuilder configBuilder = new MongodConfigBuilder()
-                .version(getVersion())
-                .net(new Net(bindIp, port, Network.localhostIsIPv6()))
-                .replication(new Storage(getDataDirectory(), replSet, oplogSize));
-
-            if(this.syncDelay == null) {
-                configBuilder = configBuilder
-                    .cmdOptions(new MongoCmdOptionsBuilder()
-                        .defaultSyncDelay()
-                        .build());
-            }
-            else if(this.syncDelay > 0) {
-                configBuilder = configBuilder
-                    .cmdOptions(new MongoCmdOptionsBuilder()
-                        .syncDelay(this.syncDelay)
-                        .build());
-            }
-            final IMongodConfig config = configBuilder.build();
+            final IMongodConfig config = createMongodConfig();
 
 
             executable = MongodStarter.getInstance(runtimeConfig).prepare(config);
-        } catch (final UnknownHostException e) {
-            throw new MojoExecutionException("Unable to determine if localhost is ipv6", e);
-        } catch (final DistributionException e) {
+        }
+        catch (final DistributionException e) {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
-        } catch (final IOException e) {
-            throw new MojoExecutionException("Unable to Config MongoDB: ", e);
         }
 
         try {
             final MongodProcess mongod = executable.start();
 
-            if (wait) {
-                while (true) {
-                    try {
-                        TimeUnit.MINUTES.sleep(5);
-                    } catch (final InterruptedException e) {
-                        break;
-                    }
-                }
-            }
+            this.executeWait();
 
             getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
         } catch (final IOException e) {
@@ -334,13 +284,50 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
-    /**
-     * Saves port to the {@link MavenProject#getProperties()} (with the property
-     * name {@code mongodb.port}) to allow others (plugins, tests, etc) to
-     * find the randomly allocated port.
-     */
-    private void savePortToProjectProperties() {
-        project.getProperties().put("mongodb.port", String.valueOf(port));
+    private void executeWait() {
+        if (wait) {
+            while (true) {
+                try {
+                    TimeUnit.MINUTES.sleep(5);
+                } catch (final InterruptedException e) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private IMongodConfig createMongodConfig() throws MojoExecutionException {
+        try {
+            MongodConfigBuilder configBuilder = new MongodConfigBuilder()
+                .version(createVersion())
+                .net(new Net(bindIp, port, Network.localhostIsIPv6()))
+                .replication(new Storage(getDataDirectory(), replSet, oplogSize));
+
+            configBuilder = this.configureSyncDelay(configBuilder);
+
+            return configBuilder.build();
+        }
+        catch (UnknownHostException e) {
+            throw new MojoExecutionException("Unable to determine if localhost is ipv6", e);
+        }
+        catch (IOException e) {
+            throw new MojoExecutionException("Unable to Config MongoDB: ", e);
+        }
+    }
+
+    private MongodConfigBuilder configureSyncDelay(final MongodConfigBuilder config) {
+        if(this.syncDelay == null) {
+            return config.cmdOptions(new MongoCmdOptionsBuilder()
+                    .defaultSyncDelay()
+                    .build());
+        }
+        else if(this.syncDelay > 0) {
+            return config.cmdOptions(new MongoCmdOptionsBuilder()
+                    .syncDelay(this.syncDelay)
+                    .build());
+        }
+        else
+            return config;
     }
 
     private ProcessOutput getOutputConfig() throws MojoFailureException {
@@ -361,7 +348,30 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     }
 
-    private IArtifactStore getArtifactStore() throws MojoFailureException {
+    private IRuntimeConfig createRuntimeConfig() throws MojoFailureException {
+        final ICommandLinePostProcessor commandLinePostProcessor;
+        if (authEnabled) {
+            commandLinePostProcessor = new ICommandLinePostProcessor() {
+                @Override
+                public List<String> process(final Distribution distribution, final List<String> args) {
+                    args.remove("--noauth");
+                    args.add("--auth");
+                    return args;
+                }
+            };
+        } else {
+            commandLinePostProcessor = new ICommandLinePostProcessor.Noop();
+        }
+
+        return new RuntimeConfigBuilder()
+            .defaults(Command.MongoD)
+            .processOutput(getOutputConfig())
+            .artifactStore(createArtifactStore())
+            .commandLinePostProcessor(commandLinePostProcessor)
+            .build();
+    }
+
+    private IArtifactStore createArtifactStore() throws MojoFailureException {
         final ITempNaming naming;
         if(executableNaming == null)
             throw new IllegalStateException("executableNaming should never be null!");
@@ -378,6 +388,41 @@ public class StartMongoMojo extends AbstractMongoMojo {
             downloadConfig = downloadConfig.artifactStorePath(storePath);
         }
         return new ArtifactStoreBuilder().defaults(Command.MongoD).download(downloadConfig.build()).executableNaming(naming).build();
+    }
+
+    private IFeatureAwareVersion createVersion() {
+
+        final Feature[] features = getFeatures();
+
+        if(this.version == null || this.version.equals("")) {
+            if(features.length == 0)
+                return Version.Main.PRODUCTION;
+            this.version = Version.Main.PRODUCTION.asInDownloadPath();
+        }
+
+        String versionEnumName = this.version.toUpperCase().replaceAll("\\.", "_");
+
+        if (versionEnumName.charAt(0) != 'V') {
+            versionEnumName = "V" + versionEnumName;
+        }
+
+        IVersion determinedVersion;
+        try {
+            determinedVersion = Version.valueOf(versionEnumName);
+        } catch (final IllegalArgumentException e) {
+            getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
+            determinedVersion = new IVersion() {
+                @Override
+                public String asInDownloadPath() {
+                    return version;
+                }
+            };
+        }
+
+        if(features.length == 0)
+            return Versions.withFeatures(determinedVersion);
+        else
+            return Versions.withFeatures(determinedVersion, features);
     }
 
     private void addProxySelector() {
@@ -409,43 +454,22 @@ public class StartMongoMojo extends AbstractMongoMojo {
         });
     }
 
-    private IFeatureAwareVersion getVersion() {
-
+    private Feature[] getFeatures() {
         final HashSet<Feature> featuresSet = new HashSet<Feature>();
         if(this.features != null && this.features.length > 0) {
             for(final String featureString : this.features)
                 featuresSet.add(Feature.valueOf(featureString.toUpperCase()));
         }
+        return (Feature[]) featuresSet.toArray();
+    }
 
-        if(this.version == null || this.version.equals("")) {
-            if(featuresSet.isEmpty())
-                return Version.Main.PRODUCTION;
-            this.version = Version.Main.PRODUCTION.asInDownloadPath();
-        }
-
-        String versionEnumName = this.version.toUpperCase().replaceAll("\\.", "_");
-
-        if (versionEnumName.charAt(0) != 'V') {
-            versionEnumName = "V" + versionEnumName;
-        }
-
-        IVersion determinedVersion;
-        try {
-            determinedVersion = Version.valueOf(versionEnumName);
-        } catch (final IllegalArgumentException e) {
-            getLog().warn("Unrecognised MongoDB version '" + this.version + "', this might be a new version that we don't yet know about. Attemping download anyway...");
-            determinedVersion = new IVersion() {
-                @Override
-                public String asInDownloadPath() {
-                    return version;
-                }
-            };
-        }
-
-        if(featuresSet.isEmpty())
-            return Versions.withFeatures(determinedVersion);
-        else
-            return Versions.withFeatures(determinedVersion, (Feature[]) featuresSet.toArray());
+    /**
+     * Saves port to the {@link MavenProject#getProperties()} (with the property
+     * name {@code mongodb.port}) to allow others (plugins, tests, etc) to
+     * find the randomly allocated port.
+     */
+    private void savePortToProjectProperties() {
+        project.getProperties().put("mongodb.port", String.valueOf(port));
     }
 
     private String getDataDirectory() {
