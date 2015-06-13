@@ -267,9 +267,10 @@ public class StartMongoMojo extends AbstractMongoMojo {
     @Parameter(property = "mongodb.parallel", defaultValue = "false")
     private boolean parallelImport;
 
-    private Integer setPort = null;
-
+    @Parameter
     private InitializerConfig[] initalizations;
+
+    private Integer setPort = null;
 
     public StartMongoMojo() {
     }
