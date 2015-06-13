@@ -327,10 +327,10 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
             return configBuilder.build();
         }
-        catch (UnknownHostException e) {
+        catch (final UnknownHostException e) {
             throw new MojoExecutionException("Unable to determine if localhost is ipv6", e);
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             throw new MojoExecutionException("Unable to Config MongoDB: ", e);
         }
     }
@@ -404,7 +404,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
         de.flapdoodle.embed.process.config.store.DownloadConfigBuilder downloadConfig = new DownloadConfigBuilder().defaultsForCommand(Command.MongoD).downloadPath(downloadPath);
         if(artifactDirectory != null ) {
-            IDirectory storePath = new FixedPath(artifactDirectory);
+            final IDirectory storePath = new FixedPath(artifactDirectory);
             downloadConfig = downloadConfig.artifactStorePath(storePath);
         }
         return new ArtifactStoreBuilder().defaults(Command.MongoD).download(downloadConfig.build()).executableNaming(naming).build();
@@ -508,11 +508,11 @@ public class StartMongoMojo extends AbstractMongoMojo {
         if(imports == null || imports.length == 0)
             return;
 
-        List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
+        final List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
 
         getLog().info("Default import database: " + defaultImportDatabase);
 
-        for(ImportDataConfig importData: imports) {
+        for(final ImportDataConfig importData: imports) {
 
             getLog().info("Import " + importData);
 
@@ -524,7 +524,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             }
 
             try {
-                IMongoImportConfig mongoImportConfig = new MongoImportConfigBuilder()
+                final IMongoImportConfig mongoImportConfig = new MongoImportConfigBuilder()
                     .version(createVersion())
                     .net(new Net(getPort(), Network.localhostIsIPv6()))
                     .db(database)
@@ -536,42 +536,42 @@ public class StartMongoMojo extends AbstractMongoMojo {
                     .timeout(new Timeout(importData.getTimeout()))
                     .build();
 
-                MongoImportExecutable mongoImport = MongoImportStarter.getDefaultInstance().prepare(mongoImportConfig);
+                final MongoImportExecutable mongoImport = MongoImportStarter.getDefaultInstance().prepare(mongoImportConfig);
 
-                MongoImportProcess importProcess = mongoImport.start();
+                final MongoImportProcess importProcess = mongoImport.start();
 
                 if(parallelImport)
                     pendingMongoProcess.add(importProcess);
                 else
                     waitFor(importProcess);
             }
-            catch (IOException e) {
+            catch (final IOException e) {
                 throw new MojoExecutionException("Unexpected IOException encountered", e);
             }
 
         }
 
-        for(MongoImportProcess importProcess: pendingMongoProcess)
+        for(final MongoImportProcess importProcess: pendingMongoProcess)
             waitFor(importProcess);
 
     }
 
-    private void waitFor(MongoImportProcess importProcess) throws MojoExecutionException {
+    private void waitFor(final MongoImportProcess importProcess) throws MojoExecutionException {
         try {
-            int code = importProcess.waitFor();
+            final int code = importProcess.waitFor();
 
             if(code != 0)
                 throw new MojoExecutionException("Cannot import '" + importProcess.getConfig().getImportFile() + "'");
 
             getLog().info("Import return code: " + code);
         }
-        catch (InterruptedException e) {
+        catch (final InterruptedException e) {
             throw new MojoExecutionException("Thread execution interrupted", e);
         }
 
     }
 
-    private void verify(ImportDataConfig config) {
+    private void verify(final ImportDataConfig config) {
         Validate.notBlank(config.getFile(), "Import file is required\n\n" +
             "<imports>\n" +
             "\t<import>\n" +
@@ -591,7 +591,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             return;
 
         for(final InitDataConfig initConfig : this.initalizations ) {
-            DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
+            final DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
 
             for(final File scriptFile : initConfig.getScripts()) {
                 if(scriptFile.isDirectory())
@@ -607,10 +607,10 @@ public class StartMongoMojo extends AbstractMongoMojo {
             throw new MojoExecutionException("Database name is missing");
         }
 
-        MongoClient mongoClient;
+        final MongoClient mongoClient;
         try {
             mongoClient = new MongoClient("localhost", getPort());
-        } catch (UnknownHostException e) {
+        } catch (final UnknownHostException e) {
             throw new MojoExecutionException("Unable to connect to mongo instance", e);
         }
         getLog().info("Connected to MongoDB");
@@ -618,9 +618,9 @@ public class StartMongoMojo extends AbstractMongoMojo {
     }
 
     private void processScriptDirectory(final DB db, final File scriptDirectory) throws MojoExecutionException {
-        File[] files = scriptDirectory.listFiles();
+        final File[] files = scriptDirectory.listFiles();
         getLog().info("Folder " + scriptDirectory.getAbsolutePath() + " contains " + files.length + " file(s):");
-        for (File file : files) {
+        for (final File file : files) {
             this.processScriptFile(db, file);
         }
         getLog().info("Data initialized with success");
@@ -628,23 +628,23 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private void processScriptFile(final DB db, final File scriptFile) throws MojoExecutionException {
         Scanner scanner = null;
-        StringBuilder instructions = new StringBuilder();
+        final StringBuilder instructions = new StringBuilder();
         try {
             scanner = new Scanner(scriptFile);
             while (scanner.hasNextLine()) {
                 instructions.append(scanner.nextLine()).append("\n");
             }
-        } catch (FileNotFoundException e) {
+        } catch (final FileNotFoundException e) {
             throw new MojoExecutionException("Unable to find file with name '" + scriptFile.getName() + "'", e);
         } finally {
             if (scanner != null) {
                 scanner.close();
             }
         }
-        CommandResult result;
+        final CommandResult result;
         try {
             result = db.doEval("(function() {" + instructions.toString() + "})();", new Object[0]);
-        } catch (MongoException e) {
+        } catch (final MongoException e) {
             throw new MojoExecutionException("Unable to execute file with name '" + scriptFile.getName() + "'", e);
         }
         if (!result.ok()) {

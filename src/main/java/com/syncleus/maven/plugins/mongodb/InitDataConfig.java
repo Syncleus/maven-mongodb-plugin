@@ -23,7 +23,7 @@ public class InitDataConfig {
 
     private String databaseName;
 
-    public InitDataConfig(File[] scripts, String databaseName) {
+    public InitDataConfig(final File[] scripts, final String databaseName) {
         this.scripts = scripts;
         this.databaseName = databaseName;
     }

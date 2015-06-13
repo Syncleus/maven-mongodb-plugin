@@ -27,7 +27,7 @@ public class ImportDataConfig {
     public ImportDataConfig() {
     }
 
-    public ImportDataConfig(String database, String collection, String file, Boolean dropOnImport, Boolean upsertOnImport, long timeout) {
+    public ImportDataConfig(final String database, final String collection, final String file, final Boolean dropOnImport, final Boolean upsertOnImport, final long timeout) {
         this.database = database;
         this.collection = collection;
         this.file = file;
