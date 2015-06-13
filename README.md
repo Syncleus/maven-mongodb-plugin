@@ -145,8 +145,8 @@ Usage
                         </scripts>
                         <!-- required, The list of scripts to be executed can
                              specify individual scripts or folders. When
-                              specifying a folder all files in folder must
-                              be a valid script. -->
+                             specifying a folder all files in folder must
+                             be a valid script. -->
                     </initialization>
                 </initializations>
                 <!-- optional, Specifies a collection of initialization scripts
