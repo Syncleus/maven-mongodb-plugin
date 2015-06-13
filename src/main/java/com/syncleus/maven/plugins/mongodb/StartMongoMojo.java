@@ -258,23 +258,47 @@ public class StartMongoMojo extends AbstractMongoMojo {
     @Parameter
     private String[] features;
 
+    /**
+     * A list of imports to be performed.
+     *
+     * @since 1.0.0
+     */
     @Parameter
     private ImportDataConfig[] imports;
 
+    /**
+     * Default database to use when importing.
+     *
+     * @since 1.0.0
+     */
     @Parameter(property = "mongodb.defaultImportDatabase")
     private String defaultImportDatabase;
 
+    /**
+     * Specifies whether import operations should be forked in parallel or done sequentially.
+     *
+     * @since 1.0.0
+     */
     @Parameter(property = "mongodb.parallel", defaultValue = "false")
     private boolean parallelImport;
 
+    /**
+     * A collection of initialization scripts to be run across the databases.
+     *
+     * @since 1.0.0
+     */
     @Parameter
     private InitializerConfig[] initalizations;
 
+    /**
+     * Not a mojo configuration parameter, this is used internally.
+     */
     private Integer setPort = null;
 
     public StartMongoMojo() {
     }
 
+    // this constructor is only used for unit testing purposes.
     StartMongoMojo(int port,
                    boolean randomPort,
                    String version,

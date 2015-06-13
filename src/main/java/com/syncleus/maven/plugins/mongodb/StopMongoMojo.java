@@ -44,6 +44,7 @@ public class StopMongoMojo extends AbstractMongoMojo {
         super();
     }
 
+    //This constructor is only present for unit testing purposes.
     StopMongoMojo(boolean skip) {
         super(skip);
     }
