@@ -1,0 +1,77 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.syncleus.maven.plugins</groupId>
+        <artifactId>maven-mongodb-plugin-test-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.syncleus.maven.plugins</groupId>
+    <artifactId>maven-mongodb-plugin-test4</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+
+    <url>http://wiki.syncleus.com/index.php/maven-mongodb-plugin</url>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.syncleus.maven.plugins</groupId>
+                <artifactId>maven-mongodb-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                        <configuration>
+                            <defaultImportDatabase>test</defaultImportDatabase>
+                            <parallelImport>false</parallelImport>
+                            <imports>
+                                <import>
+                                    <database>app</database>
+                                    <collection>some_zips</collection>
+                                    <file>${basedir}/src/main/test/mongo_data/tiny_zips.json</file>
+                                    <upsertOnImport>true</upsertOnImport>
+                                    <dropOnImport>false</dropOnImport>
+                                </import>
+                                <import>
+                                    <database>intensive_test</database>
+                                    <collection>zips</collection>
+                                    <file>${basedir}/src/main/test/mongo_data/import_zips.json</file>
+                                    <dropOnImport>true</dropOnImport>
+                                    <timeout>120000</timeout>
+                                </import>
+                                <import>
+                                    <collection>test_zips</collection>
+                                    <file>${basedir}/src/main/test/mongo_data/tiny_zips.json</file>
+                                </import>
+                            </imports>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+    </dependencies>
+
+</project>

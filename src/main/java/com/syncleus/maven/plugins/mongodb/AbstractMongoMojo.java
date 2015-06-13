@@ -30,6 +30,9 @@ public abstract class AbstractMongoMojo extends AbstractMojo {
     @Parameter(property = "mongodb.skip", defaultValue = "false")
     private boolean skip;
 
+    public AbstractMongoMojo() {
+    }
+
     protected AbstractMongoMojo(final boolean skip) {
         this.skip = skip;
     }

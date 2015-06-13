@@ -50,6 +50,7 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -264,6 +265,9 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private InitializerConfig[] initalizations;
 
+    public StartMongoMojo() {
+    }
+
     StartMongoMojo(int port,
                    boolean randomPort,
                    String version,
@@ -345,18 +349,19 @@ public class StartMongoMojo extends AbstractMongoMojo {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
         }
 
-        startImport();
-        startInitialization();
-
+        final MongodProcess mongod;
         try {
-            final MongodProcess mongod = executable.start();
-
-            this.executeWait();
-            if(getPluginContext() != null)
-                getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
+            mongod = executable.start();
         } catch (final IOException e) {
             throw new MojoExecutionException("Unable to start the mongod", e);
         }
+
+        startImport();
+        startInitialization();
+
+        this.executeWait();
+        if(getPluginContext() != null)
+            getPluginContext().put(MONGOD_CONTEXT_PROPERTY_NAME, mongod);
     }
 
     private void executeWait() {
@@ -577,7 +582,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             try {
                 final IMongoImportConfig mongoImportConfig = new MongoImportConfigBuilder()
                     .version(createVersion())
-                    .net(new Net(getPort(), Network.localhostIsIPv6()))
+                    .net(new Net(bindIp, getPort(), Network.localhostIsIPv6()))
                     .db(database)
                     .collection(importData.getCollection())
                     .upsert(importData.getUpsertOnImport())
@@ -692,7 +697,8 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
         final CommandResult result;
         try {
-            result = db.doEval("(function() {" + instructions.toString() + "})();", new Object[0]);
+            final String evalString = "(function() {" + instructions.toString() + "})();";
+            result = db.doEval(evalString, new Object[0]);
         } catch (final MongoException e) {
             throw new MojoExecutionException("Unable to execute file with name '" + scriptFile.getName() + "'", e);
         }

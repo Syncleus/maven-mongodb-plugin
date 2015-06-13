@@ -24,6 +24,8 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 
+import javax.inject.Inject;
+
 /**
  * When invoked, this goal stops an instance of mojo that was started by this
  * plugin.
@@ -31,6 +33,10 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 @Mojo(name = "stop", defaultPhase = LifecyclePhase.POST_INTEGRATION_TEST)
 public class StopMongoMojo extends AbstractMongoMojo {
+
+    public StopMongoMojo() {
+        super();
+    }
 
     StopMongoMojo(boolean skip) {
         super(skip);

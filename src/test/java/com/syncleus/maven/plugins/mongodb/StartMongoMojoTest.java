@@ -48,7 +48,6 @@ public class StartMongoMojoTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    private final static int PORT = 27017;
     private File rootFolder;
     private File rootFolderWithError;
 
@@ -56,7 +55,7 @@ public class StartMongoMojoTest {
     public void testStartMongo() throws MojoFailureException, MojoExecutionException, IOException {
         initFolder();
         try {
-            new StartMongoMojoForTest(27017, false, "3.0.2", null, null, null, 0, false, "console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolder}, "myDB")}, false).execute();
+            new StartMongoMojoForTest(37017, false, "3.0.2", null, null, null, 0, false, "console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolder}, "myDB")}, false).execute();
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail("Should not fail!");
@@ -70,7 +69,7 @@ public class StartMongoMojoTest {
         thrown.expect(MojoExecutionException.class);
         thrown.expectMessage("Database name is missing");
 
-        new StartMongoMojo(27017, false, "3.0.2", null, null, null, 0, false,"console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolder}, null)}, false).execute();
+        new StartMongoMojo(47017, false, "3.0.2", null, null, null, 0, false,"console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolder}, null)}, false).execute();
     }
 
     @Test
@@ -84,7 +83,7 @@ public class StartMongoMojoTest {
         thrown.expect(MojoExecutionException.class);
         thrown.expectMessage("Error while executing instructions from file '" + rootFolderWithError.listFiles()[0].getName());
 
-        new StartMongoMojoForTest(27017, false, "3.0.2", null, null, null, 0, false, "console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolderWithError}, "myDB")}, false, database).execute();
+        new StartMongoMojoForTest(57017, false, "3.0.2", null, null, null, 0, false, "console", null, "utf-8", "http://fastdl.mongodb.org/", null, null, false, null, 0,  "uuid", null, 0, new MavenProject(), null, null, null, false, null, new InitializerConfig[]{new InitializerConfig(new File[]{rootFolderWithError}, "myDB")}, false, database).execute();
     }
 
     private void initFolder() throws IOException {
