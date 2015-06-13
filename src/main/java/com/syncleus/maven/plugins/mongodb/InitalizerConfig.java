@@ -18,12 +18,12 @@ package com.syncleus.maven.plugins.mongodb;
 
 import java.io.File;
 
-public class InitDataConfig {
+public class InitalizerConfig {
     private File[] scripts;
 
     private String databaseName;
 
-    public InitDataConfig(final File[] scripts, final String databaseName) {
+    public InitalizerConfig(final File[] scripts, final String databaseName) {
         this.scripts = scripts;
         this.databaseName = databaseName;
     }

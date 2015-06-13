@@ -265,7 +265,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private Integer setPort = null;
 
-    private InitDataConfig[] initalizations;
+    private InitalizerConfig[] initalizations;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -590,7 +590,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
         if(initalizations == null || initalizations.length == 0)
             return;
 
-        for(final InitDataConfig initConfig : this.initalizations ) {
+        for(final InitalizerConfig initConfig : this.initalizations ) {
             final DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
 
             for(final File scriptFile : initConfig.getScripts()) {
