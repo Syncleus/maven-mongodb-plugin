@@ -96,6 +96,61 @@ Usage
                 </features>
                 <!-- optional, a list of MongoDB features to enable, default is
                      none -->
+                     
+                <defaultImportDatabase>test</defaultImportDatabase>
+                <!-- optional, name of the default database to import data -->
+
+                <parallelImport>false</parallelImport>
+                <!-- optional, default false, if true it launches in parallel all
+                     imports -->
+
+                <imports>
+                    <import>
+                        <database>my_db</database>
+                        <!-- optional, name of the database, if null it will
+                             fallback to defaultImportDatabase -->
+
+                        <collection>col</collection>
+                        <!-- required, name of the collection to import data -->
+
+                        <file>import_file.json</file>
+                        <!-- required, name of the json file to import -->
+
+                        <upsertOnImport>true</upsertOnImport>
+                        <!-- optional, default true, if true it will do an upsert on
+                             each document imported -->
+
+                        <dropOnImport>false</dropOnImport>
+                        <!-- optional, default true, if true it will do a drop the
+                             collection before starts to import -->
+
+                        <timeout>20000</timeout>
+                        <!-- optional, default 20000, it will fail if it takes more
+                             than this time importing a file (time in millis) -->
+
+                    </import>
+                </imports>
+                <!-- optional, More imports are accepted and it will be
+                     executed in strict order (if parallel is not set) -->
+                         
+                <initializations>
+                    <initialization>
+                        <databaseName>myDatabase</databaseName>
+                        <!-- required, The name of the database to execute
+                             the scripts on -->
+                             
+                        <scripts>
+                            <script>/home/me/stuff/scriptDirectory</script>
+                            <script>/home/me/stuff/scriptFile.js</script>
+                        </scripts>
+                        <!-- required, The list of scripts to be executed can
+                             specify individual scripts or folders. When
+                              specifying a folder all files in folder must
+                              be a valid script. -->
+                    </initialization>
+                </initializations>
+                <!-- optional, Specifies a collection of initialization scripts
+                     to be run across various databases in the MongoDB instance -->
             </configuration>
         </execution>
         <execution>
