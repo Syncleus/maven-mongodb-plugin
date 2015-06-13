@@ -18,10 +18,7 @@ package com.syncleus.maven.plugins.mongodb;
 
 import com.syncleus.maven.plugins.mongodb.log.Loggers;
 import com.syncleus.maven.plugins.mongodb.log.Loggers.LoggingStyle;
-import de.flapdoodle.embed.mongo.Command;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
+import de.flapdoodle.embed.mongo.*;
 import de.flapdoodle.embed.mongo.config.*;
 import de.flapdoodle.embed.mongo.distribution.Feature;
 import de.flapdoodle.embed.mongo.distribution.IFeatureAwareVersion;
@@ -40,6 +37,8 @@ import de.flapdoodle.embed.process.io.directories.IDirectory;
 import de.flapdoodle.embed.process.runtime.ICommandLinePostProcessor;
 import de.flapdoodle.embed.process.runtime.Network;
 import de.flapdoodle.embed.process.store.IArtifactStore;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -50,6 +49,7 @@ import org.apache.maven.project.MavenProject;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -248,6 +248,17 @@ public class StartMongoMojo extends AbstractMongoMojo {
     @Parameter
     private String[] features;
 
+    @Parameter
+    private ImportDataConfig[] imports;
+
+    @Parameter(property = "mongodb.defaultImportDatabase")
+    private String defaultImportDatabase;
+
+    @Parameter(property = "mongodb.parallel", defaultValue = "false")
+    private Boolean parallelImport;
+
+    private Integer setPort = null;
+
     @Override
     @SuppressWarnings("unchecked")
     public void start() throws MojoExecutionException, MojoFailureException {
@@ -260,9 +271,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
         try {
             final IRuntimeConfig runtimeConfig = createRuntimeConfig();
 
-            if (randomPort)
-                port = PortUtils.allocateRandomPort();
-            savePortToProjectProperties();
+            getPort();
 
             final IMongodConfig config = createMongodConfig();
 
@@ -272,6 +281,9 @@ public class StartMongoMojo extends AbstractMongoMojo {
         catch (final DistributionException e) {
             throw new MojoExecutionException("Failed to download MongoDB distribution: " + e.withDistribution(), e);
         }
+
+        if(this.imports != null && imports.length > 0)
+            sendImportScript();
 
         try {
             final MongodProcess mongod = executable.start();
@@ -463,13 +475,16 @@ public class StartMongoMojo extends AbstractMongoMojo {
         return (Feature[]) featuresSet.toArray();
     }
 
-    /**
-     * Saves port to the {@link MavenProject#getProperties()} (with the property
-     * name {@code mongodb.port}) to allow others (plugins, tests, etc) to
-     * find the randomly allocated port.
-     */
-    private void savePortToProjectProperties() {
-        project.getProperties().put("mongodb.port", String.valueOf(port));
+    private int getPort() {
+        if( setPort != null )
+            return setPort;
+
+        if (randomPort)
+            setPort = PortUtils.allocateRandomPort();
+        else
+            setPort = Integer.valueOf(port);
+        project.getProperties().put("mongodb.port", setPort);
+        return setPort;
     }
 
     private String getDataDirectory() {
@@ -480,4 +495,88 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
+    private void sendImportScript() throws MojoExecutionException {
+        List<MongoImportProcess> pendingMongoProcess = new ArrayList<MongoImportProcess>();
+
+        if(imports == null || imports.length == 0) {
+            getLog().error("No imports found, check your configuration");
+
+            return;
+        }
+
+        getLog().info("Default import database: " + defaultImportDatabase);
+
+        for(ImportDataConfig importData: imports) {
+
+            getLog().info("Import " + importData);
+
+            verify(importData);
+            String database = importData.getDatabase();
+
+            if(StringUtils.isBlank(database)){
+                database = defaultImportDatabase;
+            }
+
+            try {
+                IMongoImportConfig mongoImportConfig = new MongoImportConfigBuilder()
+                    .version(createVersion())
+                    .net(new Net(getPort(), Network.localhostIsIPv6()))
+                    .db(database)
+                    .collection(importData.getCollection())
+                    .upsert(importData.getUpsertOnImport())
+                    .dropCollection(importData.getDropOnImport())
+                    .importFile(importData.getFile())
+                    .jsonArray(true)
+                    .timeout(new Timeout(importData.getTimeout()))
+                    .build();
+
+                MongoImportExecutable mongoImport = MongoImportStarter.getDefaultInstance().prepare(mongoImportConfig);
+
+                MongoImportProcess importProcess = mongoImport.start();
+
+                if(parallelImport)
+                    pendingMongoProcess.add(importProcess);
+                else
+                    waitFor(importProcess);
+            }
+            catch (IOException e) {
+                throw new MojoExecutionException("Unexpected IOException encountered", e);
+            }
+
+        }
+
+        for(MongoImportProcess importProcess: pendingMongoProcess)
+            waitFor(importProcess);
+
+    }
+
+    private void waitFor(MongoImportProcess importProcess) throws MojoExecutionException {
+        try {
+            int code = importProcess.waitFor();
+
+            if(code != 0)
+                throw new MojoExecutionException("Cannot import '" + importProcess.getConfig().getImportFile() + "'");
+
+            getLog().info("Import return code: " + code);
+        }
+        catch (InterruptedException e) {
+            throw new MojoExecutionException("Thread execution interrupted", e);
+        }
+
+    }
+
+    private void verify(ImportDataConfig config) {
+        Validate.notBlank(config.getFile(), "Import file is required\n\n" +
+            "<imports>\n" +
+            "\t<import>\n" +
+            "\t\t<file>[my file]</file>\n" +
+            "...");
+        Validate.isTrue(StringUtils.isNotBlank(defaultImportDatabase) || StringUtils.isNotBlank(config.getDatabase()), "Database is required you can either define a defaultImportDatabase or a <database> on import tags");
+        Validate.notBlank(config.getCollection(), "Collection is required\n\n" +
+            "<imports>\n" +
+            "\t<import>\n" +
+            "\t\t<collection>[my file]</collection>\n" +
+            "...");
+
+    }
 }
