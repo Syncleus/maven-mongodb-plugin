@@ -56,15 +56,11 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Collections.singletonList;
@@ -295,6 +291,11 @@ public class StartMongoMojo extends AbstractMongoMojo {
      */
     private Integer setPort = null;
 
+    /**
+     * Not a mojo configuration parameter, this is used itnernally/
+     */
+    private Set<Feature> setFeatures = null;
+
     public StartMongoMojo() {
     }
 
@@ -414,7 +415,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
                 .net(new Net(bindIp, getPort(), Network.localhostIsIPv6()))
                 .replication(new Storage(getDataDirectory(), replSet, oplogSize));
 
-            configBuilder = this.configureSyncDelay(configBuilder);
+            configBuilder.cmdOptions(this.createCmdOptions().build());
 
             return configBuilder.build();
         } catch (final UnknownHostException e) {
@@ -424,17 +425,23 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
-    private MongodConfigBuilder configureSyncDelay(final MongodConfigBuilder config) {
-        if (this.syncDelay == null) {
-            return config.cmdOptions(new MongoCmdOptionsBuilder()
-                .defaultSyncDelay()
-                .build());
-        } else if (this.syncDelay > 0) {
-            return config.cmdOptions(new MongoCmdOptionsBuilder()
-                .syncDelay(this.syncDelay)
-                .build());
-        } else
-            return config;
+    private MongoCmdOptionsBuilder createCmdOptions() {
+        MongoCmdOptionsBuilder config = new MongoCmdOptionsBuilder();
+        config = this.configureSyncDelay(config);
+        config = this.configureTextSearch(config);
+        return config;
+    }
+
+    private MongoCmdOptionsBuilder configureSyncDelay(final MongoCmdOptionsBuilder config) {
+        if (this.syncDelay == null)
+            return config.defaultSyncDelay();
+        return config.syncDelay(this.syncDelay);
+    }
+
+    private MongoCmdOptionsBuilder configureTextSearch(final MongoCmdOptionsBuilder config) {
+        if(getFeatures().contains(Feature.TEXT_SEARCH))
+            return config.enableTextSearch(true);
+        return config;
     }
 
     private ProcessOutput getOutputConfig() throws MojoFailureException {
@@ -499,7 +506,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     private IFeatureAwareVersion createVersion() {
 
-        final Feature[] features = getFeatures();
+        final Feature[] features = getFeatures().toArray(new Feature[getFeatures().size()]);
 
         if (this.version == null || this.version.equals("")) {
             if (features.length == 0)
@@ -561,14 +568,16 @@ public class StartMongoMojo extends AbstractMongoMojo {
         });
     }
 
-    private Feature[] getFeatures() {
+    private Set<Feature> getFeatures() {
+        if( setFeatures != null )
+            return setFeatures;
         final HashSet<Feature> featuresSet = new HashSet<Feature>();
         if (this.features != null && this.features.length > 0) {
             for (final String featureString : this.features)
                 featuresSet.add(Feature.valueOf(featureString.toUpperCase()));
         }
-        final Feature[] retVal = new Feature[featuresSet.size()];
-        return featuresSet.toArray(retVal);
+        this.setFeatures = featuresSet;
+        return featuresSet;
     }
 
     private int getPort() {
