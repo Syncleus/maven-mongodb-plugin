@@ -14,7 +14,7 @@ Usage
 <plugin>
     <groupId>com.syncleus.maven.plugins</groupId>
     <artifactId>maven-mongodb-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <executions>
         <execution>
             <id>start</id>

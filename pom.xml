@@ -23,7 +23,7 @@
 
     <groupId>com.syncleus.maven.plugins</groupId>
     <artifactId>maven-mongodb-plugin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>maven-mongodb-plugin</name>
