@@ -100,6 +100,100 @@
             <timezone>-5</timezone>
         </developer>
     </developers>
+    <contributors>
+        <contributor>
+            <name>Joe Littlejohn</name>
+            <email>joelittlejohn@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+                <role>Tester</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Paulo Pires</name>
+            <email>pjpires@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Jeremy Norris</name>
+            <email>jeremy.norris@service-now.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>David M. Carr</name>
+            <email>david@carrclan.us</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>GTExcalibur</name>
+            <email>gtexcalibur@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>rmarpozo</name>
+            <email>rmarpozo@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Matthew Adams</name>
+            <email>matthew@matthewadams.me</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Juraj Martinka</name>
+            <email>juraj.martinka@gooddata.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Alexander Dietrich</name>
+            <email>dietrich@adobe.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Brandon Chapman</name>
+            <email>bchapman@bridge2solutions.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Carlos Ortiz</name>
+            <email>carlos.ortiz@craftercms.org</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Pablo Diaz</name>
+            <email>padilo@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Pierre-Jean Vardanega</name>
+            <email>pierrejean.vardanega@gmail.com</email>
+            <roles>
+                <role>Developer</role>
+            </roles>
+        </contributor>
+    </contributors>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
