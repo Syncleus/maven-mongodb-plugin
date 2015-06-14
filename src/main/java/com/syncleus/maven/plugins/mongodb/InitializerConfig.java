@@ -23,6 +23,9 @@ public class InitializerConfig {
 
     private String databaseName;
 
+    public InitializerConfig() {
+    }
+
     public InitializerConfig(final File[] scripts, final String databaseName) {
         this.scripts = scripts;
         this.databaseName = databaseName;
