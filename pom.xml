@@ -163,7 +163,7 @@
                     <aggregate>true</aggregate>
                     <encoding>UTF-8</encoding>
                     <failIfMissing>true</failIfMissing>
-                    <skipExistingHeaders>true</skipExistingHeaders>
+                    <skipExistingHeaders>false</skipExistingHeaders>
                     <includes>
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
