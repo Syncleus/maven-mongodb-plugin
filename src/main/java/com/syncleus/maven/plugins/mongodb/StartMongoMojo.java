@@ -21,10 +21,7 @@
  */
 package com.syncleus.maven.plugins.mongodb;
 
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
-import com.mongodb.MongoClient;
-import com.mongodb.MongoException;
+import com.mongodb.*;
 import com.syncleus.maven.plugins.mongodb.log.Loggers;
 import com.syncleus.maven.plugins.mongodb.log.Loggers.LoggingStyle;
 import de.flapdoodle.embed.mongo.*;
@@ -285,6 +282,9 @@ public class StartMongoMojo extends AbstractMongoMojo {
     @Parameter
     private InitializerConfig[] initalizations;
 
+    @Parameter
+    private ReplSetInitiateConfig replSetInitiate;
+
     /**
      * Not a mojo configuration parameter, this is used internally.
      */
@@ -387,6 +387,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
             throw new MojoExecutionException("Unable to start the mongod", e);
         }
 
+        startReplSetInitiate();
         startImport();
         startInitialization();
 
@@ -679,12 +680,13 @@ public class StartMongoMojo extends AbstractMongoMojo {
 
     }
 
+
     private void startInitialization() throws MojoExecutionException, MojoFailureException {
         if (initalizations == null || initalizations.length == 0)
             return;
 
         for (final InitializerConfig initConfig : this.initalizations) {
-            final DB db = connectToMongoAndGetDatabase(initConfig.getDatabaseName());
+            final DB db = connectToMongoAndGetDB(initConfig.getDatabaseName());
 
             for (final File scriptFile : initConfig.getScripts()) {
                 if (scriptFile.isDirectory())
@@ -695,21 +697,18 @@ public class StartMongoMojo extends AbstractMongoMojo {
         }
     }
 
-    DB connectToMongoAndGetDatabase(final String databaseName) throws MojoExecutionException {
+    @Deprecated
+    DB connectToMongoAndGetDB(final String databaseName) throws MojoExecutionException {
         if (databaseName == null || databaseName.trim().length() == 0) {
             throw new MojoExecutionException("Database name is missing");
         }
 
-        final MongoClient mongoClient;
-        try {
-            mongoClient = new MongoClient("localhost", getPort());
-        } catch (final UnknownHostException e) {
-            throw new MojoExecutionException("Unable to connect to mongo instance", e);
-        }
+        final MongoClient mongoClient = new MongoClient(new ServerAddress("localhost", getPort()));
         getLog().info("Connected to MongoDB");
         return mongoClient.getDB(databaseName);
     }
 
+    @Deprecated
     private void processScriptDirectory(final DB db, final File scriptDirectory) throws MojoExecutionException {
         final File[] files = scriptDirectory.listFiles();
         getLog().info("Folder " + scriptDirectory.getAbsolutePath() + " contains " + files.length + " file(s):");
@@ -719,6 +718,7 @@ public class StartMongoMojo extends AbstractMongoMojo {
         getLog().info("Data initialized with success");
     }
 
+    @Deprecated
     private void processScriptFile(final DB db, final File scriptFile) throws MojoExecutionException {
         Scanner scanner = null;
         final StringBuilder instructions = new StringBuilder();
@@ -746,5 +746,17 @@ public class StartMongoMojo extends AbstractMongoMojo {
             throw new MojoExecutionException("Error while executing instructions from file '" + scriptFile.getName() + "': " + result.getErrorMessage(), result.getException());
         }
         getLog().info("- file " + scriptFile.getName() + " parsed successfully");
+    }
+
+    private void startReplSetInitiate() throws MojoExecutionException, MojoFailureException {
+        if(replSetInitiate == null)
+            return;
+
+        final MongoClient mongoClient = new MongoClient(new ServerAddress("localhost", getPort()));
+        getLog().info("Connected to MongoDB");
+        final DB db = mongoClient.getDB("admin");
+
+        getLog().info("would have initated: " + replSetInitiate.makeCommand().toString());
+        db.command(new BasicDBObject("replSetInitiate", replSetInitiate.makeCommand()));
     }
 }

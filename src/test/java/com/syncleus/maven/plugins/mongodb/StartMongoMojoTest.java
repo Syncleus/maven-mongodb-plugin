@@ -131,7 +131,7 @@ public class StartMongoMojoTest {
         }
 
         @Override
-        DB connectToMongoAndGetDatabase(String databaseName) throws MojoExecutionException {
+        DB connectToMongoAndGetDB(String databaseName) throws MojoExecutionException {
             return database;
         }
     }
