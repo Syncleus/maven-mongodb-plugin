@@ -1,6 +1,6 @@
 maven-mongodb-plugin
 =======================
-[![Dependency Status](https://www.versioneye.com/user/projects/557a20a86165340022000001/badge.svg?style=flat)](https://www.versioneye.com/user/projects/557a20a86165340022000001)
+[![Dependencies](https://www.versioneye.com/user/projects/557a20a86165340022000001/badge.svg?style=flat)](https://www.versioneye.com/user/projects/557a20a86165340022000001)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.syncleus.maven.plugins/maven-mongodb-plugin/badge.png?style=flat)](https://maven-badges.herokuapp.com/maven-central/com.syncleus.maven.plugins/maven-mongodb-plugin/)
 
 Maven plugin wrapper for the [flapdoodle.de embedded MongoDB API](http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de).
