@@ -88,7 +88,7 @@ Usage
 
                 <skip>false</skip>
                 <!-- optional, skips this plugin entirely, use on the command line
-                     like -Dembedmongo.skip -->
+                     like -Dmongodb.skip -->
                 
                 <features>
                     <feature>sync_delay</feature>
