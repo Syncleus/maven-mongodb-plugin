@@ -1,7 +1,5 @@
 maven-mongodb-plugin
 =======================
-[![Test Coverage](https://img.shields.io/sonar/http/sonar.syncleus.com/com.syncleus.mavin.plugins:maven-mongodb-plugin/coverage.svg?style=flat)](http://sonar.syncleus.com/dashboard/index/8914)
-[![dependencies](https://www.versioneye.com/user/projects/557a20a86165340022000001/badge.svg?style=flat)](https://www.versioneye.com/user/projects/557a20a86165340022000001)
 
 Maven plugin wrapper for the [flapdoodle.de embedded MongoDB API](http://github.com/flapdoodle-oss/embedmongo.flapdoodle.de).
 
@@ -14,7 +12,7 @@ Usage
 <plugin>
     <groupId>com.syncleus.maven.plugins</groupId>
     <artifactId>maven-mongodb-plugin</artifactId>
-    <version>1.0.1</version>
+    <version>1.1.1</version>
     <executions>
         <execution>
             <id>start</id>
