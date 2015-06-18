@@ -1,5 +1,13 @@
 # maven-mongodb-plugin Changelog
 
+## v1.1.1
+
+* Wrong readme information in the last release.
+
+## v1.1.0
+
+* Added the ability to configure via the replSetInitiate command.
+
 ## 1.0.1
 
 * Fixed a bug which prevented configuration of intializers.
