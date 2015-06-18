@@ -23,7 +23,7 @@
 
     <groupId>com.syncleus.maven.plugins</groupId>
     <artifactId>maven-mongodb-plugin</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.2-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
 
     <name>maven-mongodb-plugin</name>
@@ -48,7 +48,6 @@
         <connection>scm:git:http://gerrit.syncleus.com/maven-mongodb-plugin</connection>
         <developerConnection>scm:git:ssh://gerrit.syncleus.com:29418/maven-mongodb-plugin</developerConnection>
         <url>http://gerrit.syncleus.com/maven-mongodb-plugin</url>
-        <tag>v1.1.1</tag>
     </scm>
 
     <ciManagement>
