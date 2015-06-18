@@ -104,6 +104,46 @@ Usage
                 <!-- optional, default false, if true it launches in parallel all
                      imports -->
 
+                <replSetInitiate>
+                    <_id>rs0</_id>
+                    <version>1</version>
+                    <members>
+                        <member>
+                            <_id>0</_id>
+                            <host>localhost:27017</host>
+                            <arbiterOnly>true</arbiterOnly>
+                            <buildIndexes>false</buildIndexes>
+                            <hidden>false</hidden>
+                            <priority>1</priority>
+                            <slaveDelay>20</slaveDelay>
+                            <votes>3</votes>
+                            <tags>
+                                <myTagKey>myTagValue</myTagKey>
+                                <differentTagKey>someOtherValue</differentTagKey>
+                            <tags>
+                        </member>
+                    </members>
+                    <settings>
+                        <chainingAllowed>true</chainingAllowed>
+                        <heartbeatTimeoutSecs>30</heartbeatTimeoutSecs>
+                        <getLastErrorModes>
+                            <getLastErrorMode>
+                                <writeConcern>ACKNOWLEDGED</writeConcern>
+                            </getLastErrorMode>
+                            <getLastErrorMode>
+                                <writeConcern>eastCoast</writeConcern>
+                                <tags>
+                                    <east>1</east>
+                                </tags>
+                            </getLastErrorMode>
+                        </getLastErrorModes>
+                    </settings>
+                </replSetInitiate>
+                <!-- optional, sends a replSetInitiate command to the server once
+                     it comes up. The names of the tags as well as which tags are
+                     allowed are the same as those for the MongoDB command itself
+                     please see the MongoDB reference for more information -->
+
                 <imports>
                     <import>
                         <database>my_db</database>
@@ -150,7 +190,8 @@ Usage
                     </initialization>
                 </initializations>
                 <!-- optional, Specifies a collection of initialization scripts
-                     to be run across various databases in the MongoDB instance -->
+                     to be run across various databases in the MongoDB instance,
+                     WARNING: initializations are deprecated, avoid using them.-->
             </configuration>
         </execution>
         <execution>
