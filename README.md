@@ -6,6 +6,8 @@ Maven plugin wrapper for the [flapdoodle.de embedded MongoDB API](http://github.
 
 This plugin lets you start and stop an instance of MongoDB during a Maven build, e.g. for integration testing. The Mongo instance isn't strictly embedded (it's not running within the JVM of your application), but it _is_ a managed instance that exists only for the lifetime of your build.
 
+To file a bug, or request a new feature please submit it to our [JIRA issue tracker](http://bugs.syncleus.com/browse/MMP).
+
 Usage
 -----
 
