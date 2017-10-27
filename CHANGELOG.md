@@ -1,4 +1,10 @@
-# maven-mongodb-plugin Changelog
+# mongodb-maven-plugin Changelog
+
+## 1.2.0
+
+* Changed plugin name to mongodb-maven-plugin
+* Added the nexus-staging-maven-plugin plugin.
+* Moved maven-gpg-plugin to a profile.
 
 ## v1.1.1
 
